@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonPopover, } from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
+import { TicketmasterService } from '../services/ticketmaster.service';
 
 @Component({
   selector: 'app-home',
@@ -24,6 +25,9 @@ import { ExploreContainerComponent } from '../explore-container/explore-containe
 })
 
 export class HomePage {
+  // inject TicketmasterService
+  private ticketmasterService = inject(TicketmasterService);
+
   events: { 
     id: string;
     title: string; 
