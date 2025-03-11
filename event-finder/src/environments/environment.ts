@@ -3,7 +3,9 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  ticketmaster_api_key: 'LdBKE6NEZn3XSuQNquAbqcA2UAlVzAbG',
+  ticketmaster_api_url: 'https://app.ticketmaster.com/discovery/v2/events.json',
 };
 
 /*
