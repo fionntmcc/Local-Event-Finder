@@ -1,7 +1,7 @@
-/* export interface ApiResult {
+export interface ApiResult {
     page: number;
-    results: MovieResult[];
-    result: MovieResult;
+    results: any;
+    result: any;
     total_pages: number;
     total_results: number;
-  } */
+  } 
