@@ -1,0 +1,7 @@
+{
+  "name": "event-finder",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
