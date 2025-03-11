@@ -12,6 +12,22 @@
       <ion-title size="large">Home</ion-title>
     </ion-toolbar>
   </ion-header>
-
-  <app-explore-container name="Homepage"></app-explore-container>
+  
+  <ion-list>
+    
+    @for (event of events; track event.id) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>{{ event.title }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content></ion-card-content>
+        <ion-card-content>
+          <img [src]="event.imageUrl" alt="{{ event.title }}" />
+          <p>{{ event.date }}</p>
+          <p>{{ event.location }}</p>
+        </ion-card-content>
+      </ion-card>
+    }
+    
+  </ion-list>
 </ion-content>
