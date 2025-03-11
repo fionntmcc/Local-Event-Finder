@@ -1,7 +1,12 @@
 import { Component, inject } from '@angular/core';
-import { IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonPopover, } from '@ionic/angular/standalone';
+import {
+  IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonPopover, InfiniteScrollCustomEvent, IonInfiniteScroll,
+  IonInfiniteScrollContent,
+} from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { TicketmasterService } from '../services/ticketmaster.service';
+// import { ApiResult } from '../services/interfaces';
+import { finalize, catchError } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -9,16 +14,18 @@ import { TicketmasterService } from '../services/ticketmaster.service';
   styleUrls: ['home.page.scss'],
   imports: [
     IonList,
-    IonHeader, 
-    IonToolbar, 
-    IonTitle, 
-    IonContent, 
-    IonText, 
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonText,
     IonCard,
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
     ExploreContainerComponent,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
     IonButton,
     IonPopover,
   ],
@@ -28,37 +35,66 @@ export class HomePage {
   // inject TicketmasterService
   private ticketmasterService = inject(TicketmasterService);
 
-  events: { 
-    id: string;
-    title: string; 
-    date: string; 
-    location: string; 
-    imageUrl: string 
-  }[];
-  
-  constructor() {
-    this.events = [
-      {
-        id: '1', 
-        title: 'Pub Crawl',
-        date: '2025-03-15', 
-        location: 'Mary Mullens', 
-        imageUrl: 'https://th.bing.com/th?id=OIP.UY8_4eKIWsH5wic_HOgvNAHaEg&w=298&h=180&c=10&rs=1&qlt=99&bgcl=fffffe&r=0&o=6&dpr=1.1&pid=23.1' 
-      },
-      { 
-        id: '2', 
-        title: 'Art Exhibition', 
-        date: '2025-03-20', 
-        location: 'Galway City Museum', 
-        imageUrl: 'https://www.bing.com/th?id=OIP.6jl4Q0R_r19--rksPIadlQHaFR&w=176&h=185&c=8&rs=1&qlt=90&o=6&dpr=1.1&pid=3.1&rm=2' 
-      },
-      { 
-        id: '3', 
-        title: 'Food Festival', 
-        date: '2025-03-25', 
-        location: 'Eyre Square', 
-        imageUrl: 'https://th.bing.com/th?id=OIP.tvALJOlQexfmeBPRV5jr2AHaE8&w=200&h=200&c=10&o=6&dpr=1.1&pid=La+gastronomie+africaine+fait+son+festival&rm=2' 
-      },
-    ];
+  // Necessary inits
+  private currentPage: number = 1;
+  public events: any[] = [];
+  public error = null;
+  public id: string = "";
+  public value: string = "";
+  public isHelpOpen: boolean = false;
+  public isLoading: boolean = false;
+
+  constructor() { }
+
+  ionViewWillEnter() {
+    // reset variables
+    this.currentPage = 1;
+    this.events = [];
+    this.error = null;
+    this.id = "";
+    this.value = "";
+    this.isHelpOpen = false;
+    this.isLoading = false;
+
+    // load events
+    this.loadEvents();
+
+    console.log(this.events);
   }
+
+  // initialises events on page startup
+  loadEvents(scroll?: InfiniteScrollCustomEvent) {
+
+    this.error = null;
+
+    // get events on currentPage
+    this.ticketmasterService.getEvents(this.currentPage).pipe(
+      finalize(() => {
+        /* this.isLoading = false;
+        if (scroll) {
+          scroll.target.complete();
+        } */
+      }),
+      // if error
+      catchError((e) => {
+        console.log(e);
+        this.error = e.error.status_message;
+        return [];
+      })
+    )
+      // create Observable
+      .subscribe({
+        // use next() block
+        next: (res) => {
+          // print events to console
+          console.log(res);
+          // push event to event array
+          //this.events.push(...res.results);
+          // disable InfiniteScroll if total pages equals current page
+          /* if (scroll) {
+            scroll.target.disabled = res.total_pages === this.currentPage;
+          } */
+        },
+      });
+  } 
 }

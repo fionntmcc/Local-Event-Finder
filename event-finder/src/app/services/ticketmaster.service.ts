@@ -19,6 +19,7 @@ export class TicketmasterService {
 
   // return top movies on given page
   getEvents(page = 1): Observable<ApiResult> {
-    return this.httpClient.get<ApiResult>(`${API_URL}?countryCode=US&api_key=${API_KEY}`);
+    return this.httpClient.get<ApiResult>(`${API_URL}?countryCode=US&apikey=${API_KEY}`);
   }
 }
+/* ${API_URL}?countryCode=US&api_key=${API_KEY} */
