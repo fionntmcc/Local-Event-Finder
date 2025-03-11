@@ -22,4 +22,3 @@ export class TicketmasterService {
     return this.httpClient.get<ApiResult>(`${API_URL}?countryCode=US&apikey=${API_KEY}`);
   }
 }
-/* ${API_URL}?countryCode=US&api_key=${API_KEY} */

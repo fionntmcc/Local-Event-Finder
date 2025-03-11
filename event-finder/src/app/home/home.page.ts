@@ -5,7 +5,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { TicketmasterService } from '../services/ticketmaster.service';
-// import { ApiResult } from '../services/interfaces';
+import { ApiResult, Event } from '../services/interfaces';
 import { finalize, catchError } from 'rxjs';
 
 @Component({
@@ -37,7 +37,7 @@ export class HomePage {
 
   // Necessary inits
   private currentPage: number = 1;
-  public events: any[] = [];
+  public events: Event[] = [];
   public error = null;
   public id: string = "";
   public value: string = "";
@@ -85,11 +85,12 @@ export class HomePage {
       // create Observable
       .subscribe({
         // use next() block
-        next: (res) => {
+        next: (res: ApiResult) => {
           // print events to console
           console.log(res);
           // push event to event array
-          //this.events.push(...res.results);
+          this.events.push(...res._embedded.events);
+          console.log(this.events);
           // disable InfiniteScroll if total pages equals current page
           /* if (scroll) {
             scroll.target.disabled = res.total_pages === this.currentPage;

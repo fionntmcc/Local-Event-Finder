@@ -39,20 +39,16 @@
   </ion-header>
 
   <ion-list>
-    <!-- 
     @for (event of events; track event.id) {
     <ion-card>
       <ion-card-header>
-        <ion-card-title>{{ event.title }}</ion-card-title>
+        <ion-card-title>{{ event.name }}</ion-card-title>
       </ion-card-header>
       <ion-card-content></ion-card-content>
       <ion-card-content>
-        <img [src]="event.imageUrl" alt="{{ event.title }}" />
-        <p>{{ event.date }}</p>
-        <p>{{ event.location }}</p>
+        <img [src]="event.images[0]" alt="{{ event.name }}" />
       </ion-card-content>
     </ion-card>
     }
-    -->
   </ion-list>
 </ion-content>
