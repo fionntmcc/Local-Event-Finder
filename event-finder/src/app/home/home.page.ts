@@ -4,10 +4,9 @@ import {
   IonInfiniteScrollContent,
 } from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
-import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
-import { PredictHqService } from '../services/predict-hq/predict-hq.service';
-import { ApiResult, Event } from '../services/ticketmaster/interfaces';
+import { PredictHqService } from '../services/predict-hq/predict-hq.service'
 import { finalize, catchError } from 'rxjs';
+import { ApiResult, Event } from '../services/predict-hq/interfaces';
 
 @Component({
   selector: 'app-home',
@@ -33,8 +32,7 @@ import { finalize, catchError } from 'rxjs';
 })
 
 export class HomePage {
-  // inject TicketmasterService
-  private ticketmasterService = inject(TicketmasterService);
+  // inject PredictHqService
   private predictHqService = inject(PredictHqService);
 
   // Necessary inits
@@ -110,39 +108,8 @@ export class HomePage {
 
     this.error = null;
 
-    // get events on currentPage
-    this.ticketmasterService.getEvents(this.currentPage).pipe(
-      finalize(() => {
-        /* this.isLoading = false;
-        if (scroll) {
-          scroll.target.complete();
-        } */
-      }),
-      // if error
-      catchError((e) => {
-        console.log(e);
-        this.error = e.error.status_message;
-        return [];
-      })
-    )
-      // create Observable
-      .subscribe({
-        // use next() block
-        next: (res: ApiResult) => {
-          // print events to console
-          console.log(res);
-          // push event to event array
-          this.events.push(...res._embedded.events);
-          console.log(this.events);
-          // disable InfiniteScroll if total pages equals current page
-          /* if (scroll) {
-            scroll.target.disabled = res.total_pages === this.currentPage;
-          } */
-        },
-      });
-
       // get events on currentPage
-    this.predictHqService.getEvents(0, this.latitude, this.longitude).pipe(
+    this.predictHqService.getEvents(this.currentPage, this.latitude, this.longitude).pipe(
       finalize(() => {
         /* this.isLoading = false;
         if (scroll) {
@@ -161,10 +128,10 @@ export class HomePage {
         // use next() block
         next: (res) => {
           // print events to console
-          console.log("PredictHq result: ");
           console.log(res);
           // push event to event array
-          //this.events.push(...res._embedded.events);
+          this.events.push(...res.results);
+          console.log(this.events);
           //console.log(this.events);
           // disable InfiniteScroll if total pages equals current page
           /* if (scroll) {
