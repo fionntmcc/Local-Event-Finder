@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
   IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
   IonButton, IonPopover, InfiniteScrollCustomEvent, IonInfiniteScroll, IonInfiniteScrollContent,
@@ -9,6 +9,14 @@ import { ExploreContainerComponent } from '../explore-container/explore-containe
 import { PredictHqService } from '../services/predict-hq/predict-hq.service'
 import { finalize, catchError } from 'rxjs';
 import { ApiResult, Event } from '../services/predict-hq/interfaces';
+import { google } from 'google-maps';
+
+declare global {
+  interface Window {
+    google: any;
+    initMap: () => void;
+  }
+}
 
 @Component({
   selector: 'app-home',
@@ -39,7 +47,7 @@ import { ApiResult, Event } from '../services/predict-hq/interfaces';
   ],
 })
 
-export class HomePage {
+export class HomePage implements OnInit {
   // inject PredictHqService
   private predictHqService = inject(PredictHqService);
 
@@ -51,13 +59,36 @@ export class HomePage {
   public value: string = "";
   public isHelpOpen: boolean = false;
   public isLoading: boolean = false;
+  public map: any;
   
   // Add properties for location data
   public latitude: number = 0;
   public longitude: number = 0;
   public locationAvailable: boolean = false;
+  private mapInitialized = false;
+  private markers: any[] = [];
 
-  constructor() { }
+  constructor() { 
+    // Initialize the map callback function
+    window.initMap = () => {
+      this.initializeMap();
+    };
+  }
+
+  ngOnInit() {
+    this.loadGoogleMapsScript();
+  }
+
+  // Load Google Maps API script dynamically
+  private loadGoogleMapsScript() {
+    if (!document.querySelectorAll(`[src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_hp1omiThAyvMfBxpdThM57Rl_JCyYek&callback=initMap"]`).length) {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyA_hp1omiThAyvMfBxpdThM57Rl_JCyYek&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
+  }
 
   ionViewWillEnter() {
     // reset variables
@@ -79,6 +110,13 @@ export class HomePage {
       // If location retrieval fails, load events anyway with default location
       this.loadEvents();
     });
+  }
+
+  ionViewDidEnter() {
+    // If the map script has already loaded, manually initialize the map
+    if (window.google && !this.mapInitialized) {
+      this.initializeMap();
+    }
   }
 
   // Get the user's current location
@@ -111,6 +149,85 @@ export class HomePage {
     });
   }
 
+  private initializeMap() {
+    const mapElement = document.getElementById('map');
+    if (mapElement && window.google) {
+      this.mapInitialized = true;
+      
+      // Use user's location if available, otherwise use fallback coordinates
+      const center = this.locationAvailable
+        ? { lat: this.latitude, lng: this.longitude }
+        : { lat: 53.350140, lng: -6.266155 }; // Default to Dublin coordinates
+      
+      this.map = new window.google.maps.Map(mapElement, {
+        center: center,
+        zoom: 12,
+        styles: [
+          {
+            featureType: "poi",
+            elementType: "labels",
+            stylers: [{ visibility: "off" }]
+          }
+        ],
+        mapTypeControl: false,
+        streetViewControl: false
+      });
+      
+      // Add a marker for the user's location
+      if (this.locationAvailable) {
+        new window.google.maps.Marker({
+          position: center,
+          map: this.map,
+          title: 'Your Location',
+          icon: {
+            path: window.google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: '#4285F4',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 2
+          }
+        });
+      }
+      
+      // Add event markers when events are loaded
+      this.addEventMarkersToMap();
+    }
+  }
+
+  // Add event markers to map
+  private addEventMarkersToMap() {
+    if (!this.map || !window.google || this.events.length === 0) return;
+    
+    // Clear existing markers
+    this.markers.forEach(marker => marker.setMap(null));
+    this.markers = [];
+    
+    // Add new markers
+    this.events.forEach(event => {
+      if (event.location && event.location.length >= 2) {
+        const marker = new window.google.maps.Marker({
+          position: { lat: event.location[1], lng: event.location[0] },
+          map: this.map,
+          title: event.title,
+          animation: window.google.maps.Animation.DROP
+        });
+        
+        // Add click listener to open info window
+        const infowindow = new window.google.maps.InfoWindow({
+          content: `<div style="width:200px"><strong>${event.title}</strong>
+                   <p>${this.formatDate(event.start_local)}</p></div>`
+        });
+        
+        marker.addListener('click', () => {
+          infowindow.open(this.map, marker);
+        });
+        
+        this.markers.push(marker);
+      }
+    });
+  }
+
   // initialises events on page startup
   loadEvents(scroll?: InfiniteScrollCustomEvent) {
 
@@ -140,6 +257,8 @@ export class HomePage {
           // push event to event array
           this.events.push(...res.results);
           console.log(this.events);
+          // Add markers to map if map is initialized
+          this.addEventMarkersToMap();
           //console.log(this.events);
           // disable InfiniteScroll if total pages equals current page
           /* if (scroll) {

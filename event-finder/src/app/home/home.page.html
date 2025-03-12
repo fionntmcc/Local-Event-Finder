@@ -7,6 +7,11 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <!-- Map Section -->
+  <div class="map-container">
+    <div id="map" class="map-canvas"></div>
+  </div>
+
   <div *ngIf="events.length === 0 && !error" class="ion-text-center ion-padding">
     <ion-text>
       <p>Loading events nearby...</p>
@@ -21,7 +26,7 @@
 
   <ion-list *ngIf="events.length > 0">
     <ion-card *ngFor="let event of events" class="event-card">
-      <div class="event-background" [ngStyle]="{'background-image': 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url(https://source.unsplash.com/400x200/?' + event.category + ')'}">
+      <div class="event-background" [ngStyle]="{'background-image': 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url(https://source.unsplash.com/400x200/photos/random/?event)'}">
         <ion-card-header>
           <ion-chip *ngIf="event.category" class="category-chip">
             {{ event.category | titlecase }}
