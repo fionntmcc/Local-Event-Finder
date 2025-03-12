@@ -2,8 +2,11 @@ import { Component, inject, OnInit } from '@angular/core';
 import {
   IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonButton, IonPopover, InfiniteScrollCustomEvent, IonInfiniteScroll, IonInfiniteScrollContent,
-  IonChip, IonIcon,
+  IonChip,
+  IonLabel, 
+  IonIcon, IonSearchbar, IonSpinner
 } from '@ionic/angular/standalone';
+import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, NgStyle, TitleCasePipe } from '@angular/common';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { PredictHqService } from '../services/predict-hq/predict-hq.service'
@@ -39,11 +42,15 @@ declare global {
     IonButton,
     IonPopover,
     IonChip,
+    IonLabel,
     IonIcon,
     NgFor,
     NgIf,
     NgStyle,
     TitleCasePipe,
+    IonSearchbar,
+    IonSpinner,
+    FormsModule
   ],
 })
 
@@ -67,6 +74,10 @@ export class HomePage implements OnInit {
   public locationAvailable: boolean = false;
   private mapInitialized = false;
   private markers: any[] = [];
+
+  // Search properties
+  public searchTerm: string = '';
+  public filteredEvents: Event[] = [];
 
   constructor() {
     // Initialize the map callback function
@@ -94,11 +105,13 @@ export class HomePage implements OnInit {
     // reset variables
     this.currentPage = 1;
     this.events = [];
+    this.filteredEvents = [];
+    this.searchTerm = '';
     this.error = null;
     this.id = "";
     this.value = "";
     this.isHelpOpen = false;
-    this.isLoading = false;
+    this.isLoading = true;
     this.locationAvailable = false;
 
     // Get user's location first
@@ -197,64 +210,22 @@ export class HomePage implements OnInit {
 
   // Add event markers to map
   private addEventMarkersToMap() {
-    if (!this.map || !window.google || this.events.length === 0) return;
-
-    // Clear existing markers
-    this.markers.forEach(marker => marker.setMap(null));
-    this.markers = [];
-
-    // Add new markers
-    this.events.forEach(event => {
-      if (event.location && event.location.length >= 2) {
-        const marker = new window.google.maps.Marker({
-          position: { lat: event.location[1], lng: event.location[0] },
-          map: this.map,
-          title: event.title,
-          animation: window.google.maps.Animation.DROP,
-        });
-
-        // Add click listener to open info window
-
-        const infowindow = new window.google.maps.InfoWindow({
-          content: `
-          <div style="color: black;">
-            <h3>${event.title}</h3>
-            <p>${this.formatDate(event.start_local)}</p>
-            <p>${this.getDistance(event.location[1], event.location[0])}</p>
-            <p>${event.description}</p>
-            <p>${event.labels.join(', ')}</p>
-          </div>
-          `
-        });
-
-
-        marker.addListener('click', () => {
-          infowindow.open(this.map, marker);
-        });
-        
-        // close popup if clicked outside
-        window.google.maps.event.addListener(this.map, 'click', function() {
-          infowindow.close();
-        });
-        
-
-        this.markers.push(marker);
-      }
-    });
+    this.updateMapMarkersForSearch();
   }
 
   // initialises events on page startup
   loadEvents(scroll?: InfiniteScrollCustomEvent) {
 
     this.error = null;
+    this.isLoading = true;
 
     // get events on currentPage
     this.predictHqService.getEvents(this.currentPage, this.latitude, this.longitude).pipe(
       finalize(() => {
-        /* this.isLoading = false;
+        this.isLoading = false;
         if (scroll) {
           scroll.target.complete();
-        } */
+        }
       }),
       // if error
       catchError((e) => {
@@ -347,5 +318,104 @@ export class HomePage implements OnInit {
   getLimitedLabels(labels: string[], limit: number): string[] {
     if (!labels) return [];
     return labels.slice(0, limit);
+  }
+
+  // Search events based on searchTerm
+  public searchEvents() {
+    if (!this.searchTerm.trim()) {
+      this.filteredEvents = [];
+      this.addEventMarkersToMap();
+      return;
+    }
+
+    const term = this.searchTerm.toLowerCase().trim();
+
+    this.filteredEvents = [];
+    
+    this.loadEvents()
+
+    /* 
+    this.filteredEvents = this.events.filter(event => {
+      return (
+        // Search by title
+        event.title?.toLowerCase().includes(term) ||
+        // Search by description
+        event.description?.toLowerCase().includes(term) ||
+        // Search by category
+        event.category?.toLowerCase().includes(term) ||
+        // Search by labels
+        event.labels?.some(label => label.toLowerCase().includes(term))
+      );
+    }); 
+    */
+
+    // Update map markers to show only filtered events
+    this.updateMapMarkersForSearch();
+  }
+  
+  // Update map markers to display only filtered results
+  updateMapMarkersForSearch() {
+    if (!this.map || !window.google) return;
+    
+    // Clear existing markers
+    this.markers.forEach(marker => marker.setMap(null));
+    this.markers = [];
+    
+    // Get events to display (filtered or all)
+    const eventsToDisplay = this.searchTerm ? this.filteredEvents : this.events;
+    
+    // Add new markers for filtered events
+    eventsToDisplay.forEach(event => {
+      if (event.location && event.location.length >= 2) {
+        const marker = new window.google.maps.Marker({
+          position: { lat: event.location[1], lng: event.location[0] },
+          map: this.map,
+          title: event.title,
+          animation: window.google.maps.Animation.DROP
+        });
+        
+        // Add click listener to open info window
+        const infowindow = new window.google.maps.InfoWindow({
+          content: `
+          <div style="color: black;">
+            <h3>${event.title}</h3>
+            <p>${this.formatDate(event.start_local)}</p>
+            <p>${this.getDistance(event.location[1], event.location[0])}</p>
+            <p>${event.description || ''}</p>
+            <p>${event.labels?.join(', ') || ''}</p>
+          </div>
+          `
+        });
+
+        marker.addListener('click', () => {
+          infowindow.open(this.map, marker);
+        });
+        
+        // Close popup if clicked outside
+        window.google.maps.event.addListener(this.map, 'click', function() {
+          infowindow.close();
+        });
+        
+        this.markers.push(marker);
+      }
+    });
+    
+    // If we have filtered events and there are results, center the map on the first result
+    if (this.searchTerm && this.filteredEvents.length > 0 && 
+        this.filteredEvents[0].location && 
+        this.filteredEvents[0].location.length >= 2) {
+      this.map.setCenter({
+        lat: this.filteredEvents[0].location[1], 
+        lng: this.filteredEvents[0].location[0]
+      });
+      this.map.setZoom(13);
+    }
+  }
+  
+  // Clear search and reset to all events
+  clearSearch() {
+    this.searchTerm = '';
+    this.filteredEvents = [];
+    this.addEventMarkersToMap();
   }
 }

@@ -7,14 +7,38 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <!-- Search Bar -->
+  <div class="search-container">
+    <ion-searchbar 
+      [(ngModel)]="searchTerm" 
+      (ionChange)="searchEvents()"
+      placeholder="Search events, categories or places"
+      animated
+      debounce="300"
+      show-clear-button="always">
+    </ion-searchbar>
+    
+    <ion-chip *ngIf="searchTerm" (click)="clearSearch()" color="medium">
+      <ion-label>Clear</ion-label>
+      <ion-icon name="close-circle"></ion-icon>
+    </ion-chip>
+  </div>
+
   <!-- Map Section -->
   <div class="map-container">
     <div id="map" class="map-canvas"></div>
   </div>
 
-  <div *ngIf="events.length === 0 && !error" class="ion-text-center ion-padding">
+  <div *ngIf="events.length === 0 && !error && !isLoading" class="ion-text-center ion-padding">
     <ion-text>
-      <p>Loading events nearby...</p>
+      <p>No events found nearby. Try adjusting your search.</p>
+    </ion-text>
+  </div>
+
+  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+    <ion-spinner name="circular"></ion-spinner>
+    <ion-text>
+      <p>Loading events...</p>
     </ion-text>
   </div>
 
@@ -24,8 +48,9 @@
     </ion-text>
   </div>
 
-  <ion-list *ngIf="events.length > 0">
-    <ion-card *ngFor="let event of events" class="event-card">
+  <!-- Display filtered events if search is active, otherwise display all events -->
+  <ion-list *ngIf="(searchTerm ? filteredEvents : events).length > 0">
+    <ion-card *ngFor="let event of (searchTerm ? filteredEvents : events)" class="event-card">
       <div class="event-background" [ngStyle]="{'background-image': 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url(https://source.unsplash.com/400x200/photos/random/?event)'}">
         <ion-card-header>
           <ion-chip *ngIf="event.category" class="category-chip">
@@ -66,7 +91,7 @@
     </ion-card>
   </ion-list>
 
-  <ion-infinite-scroll (ionInfinite)="loadEvents($event)">
+  <ion-infinite-scroll (ionInfinite)="loadEvents($event)" *ngIf="!searchTerm">
     <ion-infinite-scroll-content loadingText="Loading more events..."></ion-infinite-scroll-content>
   </ion-infinite-scroll>
 </ion-content>
