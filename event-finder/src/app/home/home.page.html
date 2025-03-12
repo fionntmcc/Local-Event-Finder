@@ -1,53 +1,67 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Home
+      Local Events
     </ion-title>
-
-    <ion-button slot="end" color="medium" class="margin" id="help-menu-trigger">Click here for help</ion-button>
-    <ion-popover trigger="help-menu-trigger" triggerAction="click">
-      <ng-template>
-        <ion-content class="ion-padding">
-          <h2>
-            Welcome to Local Event Finder!
-          </h2>
-          <p>
-            In this app, you can find the latest and greatest events happening in your area.
-          </p>
-          <p>
-            This app uses the Ticketmaster and Eventbrite APIs.
-          </p>
-          <p>
-            I hope you enjoy this app!
-          </p>
-          <p>
-            - Created by Fionn McCarthy
-          </p>
-        </ion-content>
-      </ng-template>
-    </ion-popover>
   </ion-toolbar>
 </ion-header>
 
-
-
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Home</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div *ngIf="events.length === 0 && !error" class="ion-text-center ion-padding">
+    <ion-text>
+      <p>Loading events nearby...</p>
+    </ion-text>
+  </div>
 
-  <ion-list>
-    @for (event of events; track event.id) {
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>{{ event.title }}</ion-card-title>
-      </ion-card-header>
-      <ion-card-content></ion-card-content>
-      <ion-card-content>
-      </ion-card-content>
+  <div *ngIf="error" class="ion-text-center ion-padding">
+    <ion-text color="danger">
+      <p>{{ error }}</p>
+    </ion-text>
+  </div>
+
+  <ion-list *ngIf="events.length > 0">
+    <ion-card *ngFor="let event of events" class="event-card">
+      <div class="event-background" [ngStyle]="{'background-image': 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url(https://source.unsplash.com/400x200/?' + event.category + ')'}">
+        <ion-card-header>
+          <ion-chip *ngIf="event.category" class="category-chip">
+            {{ event.category | titlecase }}
+          </ion-chip>
+          <ion-card-title class="event-title">{{ event.title }}</ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content class="event-content">
+          <div class="event-details">
+            <div class="event-info">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <span>{{ formatDate(event.start_local) }}</span>
+            </div>
+            
+            <div class="event-info" *ngIf="event.location && event.location.length >= 2">
+              <ion-icon name="location-outline"></ion-icon>
+              <span>{{ getDistance(event.location[1], event.location[0]) }} away</span>
+            </div>
+            
+            <div class="event-info" *ngIf="event.predicted_event_spend > 0">
+              <ion-icon name="wallet-outline"></ion-icon>
+              <span>Est. cost: {{ formatCurrency(event.predicted_event_spend) }}</span>
+            </div>
+          </div>
+          
+          <div class="event-description" *ngIf="event.description">
+            <p>{{ truncateDescription(event.description, 120) }}</p>
+          </div>
+          
+          <div class="event-labels" *ngIf="event.labels && event.labels.length > 0">
+            <ion-chip *ngFor="let label of getLimitedLabels(event.labels, 3)" class="small-chip">
+              {{ label }}
+            </ion-chip>
+          </div>
+        </ion-card-content>
+      </div>
     </ion-card>
-    }
   </ion-list>
+
+  <ion-infinite-scroll (ionInfinite)="loadEvents($event)">
+    <ion-infinite-scroll-content loadingText="Loading more events..."></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>

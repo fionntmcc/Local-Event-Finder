@@ -1,8 +1,10 @@
 import { Component, inject } from '@angular/core';
 import {
-  IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonPopover, InfiniteScrollCustomEvent, IonInfiniteScroll,
-  IonInfiniteScrollContent,
+  IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
+  IonButton, IonPopover, InfiniteScrollCustomEvent, IonInfiniteScroll, IonInfiniteScrollContent,
+  IonChip, IonIcon,
 } from '@ionic/angular/standalone';
+import { NgFor, NgIf, NgStyle, TitleCasePipe } from '@angular/common';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { PredictHqService } from '../services/predict-hq/predict-hq.service'
 import { finalize, catchError } from 'rxjs';
@@ -28,6 +30,12 @@ import { ApiResult, Event } from '../services/predict-hq/interfaces';
     IonInfiniteScrollContent,
     IonButton,
     IonPopover,
+    IonChip,
+    IonIcon,
+    NgFor,
+    NgIf,
+    NgStyle,
+    TitleCasePipe,
   ],
 })
 
@@ -140,4 +148,70 @@ export class HomePage {
         },
       });
   } 
+
+  // Format date for display
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+  
+  // Calculate distance from user's location
+  getDistance(eventLat: number, eventLng: number): string {
+    if (!this.locationAvailable) {
+      return 'Distance unknown';
+    }
+    
+    // Earth's radius in km
+    const R = 6371; 
+    
+    // Convert degrees to radians
+    const dLat = this.toRad(eventLat - this.latitude);
+    const dLon = this.toRad(eventLng - this.longitude);
+    
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRad(this.latitude)) * Math.cos(this.toRad(eventLat)) * 
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)} m`;
+    } else {
+      return `${distance.toFixed(1)} km`;
+    }
+  }
+  
+  private toRad(degrees: number): number {
+    return degrees * Math.PI / 180;
+  }
+  
+  // Format currency
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('en-US', { 
+      style: 'currency', 
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  }
+  
+  // Truncate description
+  truncateDescription(text: string, maxLength: number): string {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  }
+  
+  // Limit the number of labels to display
+  getLimitedLabels(labels: string[], limit: number): string[] {
+    if (!labels) return [];
+    return labels.slice(0, limit);
+  }
 }
