@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import {
-  IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
+  IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonButton, IonPopover, InfiniteScrollCustomEvent, IonInfiniteScroll, IonInfiniteScrollContent,
   IonChip, IonIcon,
 } from '@ionic/angular/standalone';
@@ -60,7 +60,7 @@ export class HomePage implements OnInit {
   public isHelpOpen: boolean = false;
   public isLoading: boolean = false;
   public map: any;
-  
+
   // Add properties for location data
   public latitude: number = 0;
   public longitude: number = 0;
@@ -68,7 +68,7 @@ export class HomePage implements OnInit {
   private mapInitialized = false;
   private markers: any[] = [];
 
-  constructor() { 
+  constructor() {
     // Initialize the map callback function
     window.initMap = () => {
       this.initializeMap();
@@ -127,7 +127,7 @@ export class HomePage implements OnInit {
         reject('Geolocation not supported');
         return;
       }
-      
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           this.latitude = position.coords.latitude;
@@ -153,12 +153,12 @@ export class HomePage implements OnInit {
     const mapElement = document.getElementById('map');
     if (mapElement && window.google) {
       this.mapInitialized = true;
-      
+
       // Use user's location if available, otherwise use fallback coordinates
       const center = this.locationAvailable
         ? { lat: this.latitude, lng: this.longitude }
         : { lat: 53.350140, lng: -6.266155 }; // Default to Dublin coordinates
-      
+
       this.map = new window.google.maps.Map(mapElement, {
         center: center,
         zoom: 12,
@@ -172,7 +172,7 @@ export class HomePage implements OnInit {
         mapTypeControl: false,
         streetViewControl: false
       });
-      
+
       // Add a marker for the user's location
       if (this.locationAvailable) {
         new window.google.maps.Marker({
@@ -189,7 +189,7 @@ export class HomePage implements OnInit {
           }
         });
       }
-      
+
       // Add event markers when events are loaded
       this.addEventMarkersToMap();
     }
@@ -198,11 +198,11 @@ export class HomePage implements OnInit {
   // Add event markers to map
   private addEventMarkersToMap() {
     if (!this.map || !window.google || this.events.length === 0) return;
-    
+
     // Clear existing markers
     this.markers.forEach(marker => marker.setMap(null));
     this.markers = [];
-    
+
     // Add new markers
     this.events.forEach(event => {
       if (event.location && event.location.length >= 2) {
@@ -210,19 +210,34 @@ export class HomePage implements OnInit {
           position: { lat: event.location[1], lng: event.location[0] },
           map: this.map,
           title: event.title,
-          animation: window.google.maps.Animation.DROP
+          animation: window.google.maps.Animation.DROP,
         });
-        
+
         // Add click listener to open info window
+
         const infowindow = new window.google.maps.InfoWindow({
-          content: `<div style="width:200px"><strong>${event.title}</strong>
-                   <p>${this.formatDate(event.start_local)}</p></div>`
+          content: `
+          <div style="color: black;">
+            <h3>${event.title}</h3>
+            <p>${this.formatDate(event.start_local)}</p>
+            <p>${this.getDistance(event.location[1], event.location[0])}</p>
+            <p>${event.description}</p>
+            <p>${event.labels.join(', ')}</p>
+          </div>
+          `
         });
-        
+
+
         marker.addListener('click', () => {
           infowindow.open(this.map, marker);
         });
         
+        // close popup if clicked outside
+        window.google.maps.event.addListener(this.map, 'click', function() {
+          infowindow.close();
+        });
+        
+
         this.markers.push(marker);
       }
     });
@@ -233,7 +248,7 @@ export class HomePage implements OnInit {
 
     this.error = null;
 
-      // get events on currentPage
+    // get events on currentPage
     this.predictHqService.getEvents(this.currentPage, this.latitude, this.longitude).pipe(
       finalize(() => {
         /* this.isLoading = false;
@@ -266,68 +281,68 @@ export class HomePage implements OnInit {
           } */
         },
       });
-  } 
+  }
 
   // Format date for display
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      month: 'short', 
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit'
     });
   }
-  
+
   // Calculate distance from user's location
   getDistance(eventLat: number, eventLng: number): string {
     if (!this.locationAvailable) {
       return 'Distance unknown';
     }
-    
+
     // Earth's radius in km
-    const R = 6371; 
-    
+    const R = 6371;
+
     // Convert degrees to radians
     const dLat = this.toRad(eventLat - this.latitude);
     const dLon = this.toRad(eventLng - this.longitude);
-    
-    const a = 
+
+    const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRad(this.latitude)) * Math.cos(this.toRad(eventLat)) * 
+      Math.cos(this.toRad(this.latitude)) * Math.cos(this.toRad(eventLat)) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
-    
+
     if (distance < 1) {
       return `${Math.round(distance * 1000)} m`;
     } else {
       return `${distance.toFixed(1)} km`;
     }
   }
-  
+
   private toRad(degrees: number): number {
     return degrees * Math.PI / 180;
   }
-  
+
   // Format currency
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', { 
-      style: 'currency', 
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
   }
-  
+
   // Truncate description
   truncateDescription(text: string, maxLength: number): string {
     if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   }
-  
+
   // Limit the number of labels to display
   getLimitedLabels(labels: string[], limit: number): string[] {
     if (!labels) return [];
