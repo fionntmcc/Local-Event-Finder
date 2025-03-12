@@ -45,6 +45,11 @@ export class HomePage {
   public value: string = "";
   public isHelpOpen: boolean = false;
   public isLoading: boolean = false;
+  
+  // Add properties for location data
+  public latitude: number = 0;
+  public longitude: number = 0;
+  public locationAvailable: boolean = false;
 
   constructor() { }
 
@@ -57,11 +62,47 @@ export class HomePage {
     this.value = "";
     this.isHelpOpen = false;
     this.isLoading = false;
+    this.locationAvailable = false;
 
-    // load events
-    this.loadEvents();
+    // Get user's location first
+    this.getUserLocation().then(() => {
+      // load events after retrieving location
+      this.loadEvents();
+    }).catch(error => {
+      console.error('Error getting location:', error);
+      // If location retrieval fails, load events anyway with default location
+      this.loadEvents();
+    });
+  }
 
-    console.log(this.events);
+  // Get the user's current location
+  async getUserLocation(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        console.log('Geolocation is not supported by this browser');
+        reject('Geolocation not supported');
+        return;
+      }
+      
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.latitude = position.coords.latitude;
+          this.longitude = position.coords.longitude;
+          this.locationAvailable = true;
+          console.log(`User location: ${this.latitude}, ${this.longitude}`);
+          resolve();
+        },
+        (error) => {
+          console.error('Error getting location', error);
+          reject(error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    });
   }
 
   // initialises events on page startup
@@ -101,7 +142,7 @@ export class HomePage {
       });
 
       // get events on currentPage
-    this.predictHqService.getEvents().pipe(
+    this.predictHqService.getEvents(0, this.latitude, this.longitude).pipe(
       finalize(() => {
         /* this.isLoading = false;
         if (scroll) {

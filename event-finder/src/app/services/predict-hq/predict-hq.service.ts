@@ -18,8 +18,8 @@ export class PredictHqService {
     constructor() { }
 
     // return top movies on given page
-    getEvents(page = 1): Observable<any> {
-        return this.httpClient.get<any>(`${API_URL}?location_around.origin=53.2719,-9.0489`
+    getEvents(page = 1, latitude = 0, longitude = 0): Observable<any> {
+        return this.httpClient.get<any>(`${API_URL}?location_around.origin=${latitude},${longitude}`
             , {
                 headers: {
                     'Authorization': `Bearer ${API_KEY}`,
