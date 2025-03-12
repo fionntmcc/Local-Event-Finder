@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { RouterLinkWithHref } from '@angular/router';
 import {
   IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonButton, IonPopover, InfiniteScrollCustomEvent, IonInfiniteScroll, IonInfiniteScrollContent,
@@ -52,7 +53,8 @@ declare global {
     TitleCasePipe,
     IonSearchbar,
     IonSpinner,
-    FormsModule
+    FormsModule,
+    RouterLinkWithHref
   ],
 })
 

@@ -44,13 +44,13 @@
 
   <div *ngIf="error" class="ion-text-center ion-padding">
     <ion-text color="danger">
-      <p>{{ error }}</p>
+      <p>{{ error }}</p>\
     </ion-text>
   </div>
 
   <!-- Display filtered events if search is active, otherwise display all events -->
   <ion-list *ngIf="events.length > 0">
-    <ion-card *ngFor="let event of events" class="event-card">
+    <ion-card *ngFor="let event of events" class="event-card" [routerLink]="['/event', event.id]">
       <div class="event-background" [ngStyle]="{'background-image': 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url(https://source.unsplash.com/400x200/photos/random/?event)'}">
         <ion-card-header>
           <ion-chip *ngIf="event.category" class="category-chip">
