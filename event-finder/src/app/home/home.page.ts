@@ -12,6 +12,7 @@ import { ExploreContainerComponent } from '../explore-container/explore-containe
 import { PredictHqService } from '../services/predict-hq/predict-hq.service'
 import { finalize, catchError } from 'rxjs';
 import { Event } from '../services/predict-hq/interfaces';
+import { LocationService } from '../services/location/location.service';
 
 declare global {
   interface Window {
@@ -56,6 +57,7 @@ declare global {
 export class HomePage implements OnInit {
   // inject PredictHqService
   private predictHqService = inject(PredictHqService);
+  private locationService = inject(LocationService);
 
   // Necessary inits
   private currentPage: number = 1;
@@ -67,9 +69,7 @@ export class HomePage implements OnInit {
   public isLoading: boolean = false;
   public map: any;
 
-  // Add properties for location data
-  public latitude: number = 0;
-  public longitude: number = 0;
+  // Location data now managed by LocationService
   public locationAvailable: boolean = false;
   private mapInitialized = false;
   private markers: any[] = [];
@@ -82,6 +82,11 @@ export class HomePage implements OnInit {
     window.initMap = () => {
       this.initializeMap();
     };
+    
+    // Subscribe to location availability
+    this.locationService.isLocationAvailable().subscribe(available => {
+      this.locationAvailable = available;
+    });
   }
 
   ngOnInit() {
@@ -109,17 +114,16 @@ export class HomePage implements OnInit {
     this.value = "";
     this.isHelpOpen = false;
     this.isLoading = true;
-    this.locationAvailable = false;
 
-    // Get user's location first
-    this.getUserLocation().then(() => {
-      // load events after retrieving location
-      this.loadEvents();
-    }).catch(error => {
-      console.error('Error getting location:', error);
-      // If location retrieval fails, load events anyway with default location
-      this.loadEvents();
-    });
+    // Use the location service to refresh location, then load events
+    this.locationService.refreshLocation()
+      .then(() => {
+        this.loadEvents();
+      })
+      .catch(error => {
+        console.error('Error getting location:', error);
+        this.loadEvents(); // Load events anyway with default location
+      });
   }
 
   ionViewDidEnter() {
@@ -129,45 +133,16 @@ export class HomePage implements OnInit {
     }
   }
 
-  // Get the user's current location
-  async getUserLocation(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        console.log('Geolocation is not supported by this browser');
-        reject('Geolocation not supported');
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          this.latitude = position.coords.latitude;
-          this.longitude = position.coords.longitude;
-          this.locationAvailable = true;
-          console.log(`User location: ${this.latitude}, ${this.longitude}`);
-          resolve();
-        },
-        (error) => {
-          console.error('Error getting location', error);
-          reject(error);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
-        }
-      );
-    });
-  }
-
   private initializeMap() {
     const mapElement = document.getElementById('map');
     if (mapElement && window.google) {
       this.mapInitialized = true;
 
-      // Use user's location if available, otherwise use fallback coordinates
-      const center = this.locationAvailable
-        ? { lat: this.latitude, lng: this.longitude }
-        : { lat: 53.350140, lng: -6.266155 }; // Default to Dublin coordinates
+      // Use location service to get coordinates
+      const center = { 
+        lat: this.locationService.getLatitude(), 
+        lng: this.locationService.getLongitude() 
+      };
 
       this.map = new window.google.maps.Map(mapElement, {
         center: center,
@@ -216,8 +191,12 @@ export class HomePage implements OnInit {
     this.error = null;
     this.isLoading = true;
 
+    // Use location service to get coordinates for API call
+    const latitude = this.locationService.getLatitude();
+    const longitude = this.locationService.getLongitude();
+
     // get events on currentPage
-    this.predictHqService.getEvents(this.currentPage, this.latitude, this.longitude).pipe(
+    this.predictHqService.getEvents(this.currentPage, latitude, longitude).pipe(
       finalize(() => {
         this.isLoading = false;
         if (scroll) {
@@ -263,32 +242,9 @@ export class HomePage implements OnInit {
     });
   }
 
-  // Calculate distance from user's location
+  // Use LocationService for distance calculation
   getDistance(eventLat: number, eventLng: number): string {
-    if (!this.locationAvailable) {
-      return 'Distance unknown';
-    }
-
-    // Earth's radius in km
-    const R = 6371;
-
-    // Convert degrees to radians
-    const dLat = this.toRad(eventLat - this.latitude);
-    const dLon = this.toRad(eventLng - this.longitude);
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRad(this.latitude)) * Math.cos(this.toRad(eventLat)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-
-    if (distance < 1) {
-      return `${Math.round(distance * 1000)} m`;
-    } else {
-      return `${distance.toFixed(1)} km`;
-    }
+    return this.locationService.getDistance(eventLat, eventLng);
   }
 
   private toRad(degrees: number): number {
