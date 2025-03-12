@@ -14,6 +14,7 @@ import { finalize, catchError } from 'rxjs';
 import { Event } from '../services/predict-hq/interfaces';
 import { LocationService } from '../services/location/location.service';
 import { StorageService } from '../services/storage/storage.service';
+import { Router } from '@angular/router';
 
 declare global {
   interface Window {
@@ -60,6 +61,7 @@ export class HomePage implements OnInit {
   private predictHqService = inject(PredictHqService);
   private locationService = inject(LocationService);
   private storageService = inject(StorageService);
+  private router = inject(Router);
 
   // Necessary inits
   private currentPage: number = 1;
@@ -347,6 +349,7 @@ export class HomePage implements OnInit {
             <p>${this.getDistance(event.location[1], event.location[0])}</p>
             <p>${event.description || ''}</p>
             <p>${event.labels?.join(', ') || ''}</p>
+            <button id="view-details-${event.id}" class="details-btn">View Details</button>
           </div>
           `
         });
@@ -358,6 +361,16 @@ export class HomePage implements OnInit {
           }
           this.openWindow = infowindow;
           infowindow.open(this.map, marker);
+          
+          // Add click event after info window is opened
+          setTimeout(() => {
+            const detailsBtn = document.getElementById(`view-details-${event.id}`);
+            if (detailsBtn) {
+              detailsBtn.addEventListener('click', () => {
+                this.navigateToEventDetails(event.id);
+              });
+            }
+          }, 300);
         });
         
         // Close popup if clicked outside
@@ -388,5 +401,10 @@ export class HomePage implements OnInit {
     this.currentPage = 1; // Reset to first page
     this.hasMorePages = true; // Reset pagination state
     this.loadEvents(); // Will load events without search term
+  }
+  
+  // Add a method to navigate to event details
+  navigateToEventDetails(eventId: string) {
+    this.router.navigate(['/event', eventId]);
   }
 }
