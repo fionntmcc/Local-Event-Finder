@@ -20,7 +20,7 @@
     
     <ion-chip *ngIf="searchTerm" (click)="clearSearch()" color="medium">
       <ion-label>Clear</ion-label>
-      <ion-icon name="close-circle"></ion-icon>
+<!--       <ion-icon name="close-circle"></ion-icon> -->
     </ion-chip>
   </div>
 
@@ -62,17 +62,17 @@
         <ion-card-content class="event-content">
           <div class="event-details">
             <div class="event-info">
-              <ion-icon name="calendar-outline"></ion-icon>
+              <!-- <ion-icon name="calendar-outline"></ion-icon> -->
               <span>{{ formatDate(event.start_local) }}</span>
             </div>
             
             <div class="event-info" *ngIf="event.location && event.location.length >= 2">
-              <ion-icon name="location-outline"></ion-icon>
+              <!-- <ion-icon name="location-outline"></ion-icon> -->
               <span>{{ getDistance(event.location[1], event.location[0]) }} away</span>
             </div>
             
             <div class="event-info" *ngIf="event.predicted_event_spend > 0">
-              <ion-icon name="wallet-outline"></ion-icon>
+              <!-- <ion-icon name="wallet-outline"></ion-icon> -->
               <span>Est. cost: {{ formatCurrency(event.predicted_event_spend) }}</span>
             </div>
           </div>
@@ -91,7 +91,7 @@
     </ion-card>
   </ion-list>
 
-  <ion-infinite-scroll (ionInfinite)="loadEvents($event)" *ngIf="!searchTerm">
+  <ion-infinite-scroll (ionInfinite)="loadMoreEvents($event)" *ngIf="!searchTerm">
     <ion-infinite-scroll-content loadingText="Loading more events..."></ion-infinite-scroll-content>
   </ion-infinite-scroll>
 </ion-content>

@@ -70,6 +70,7 @@ export class HomePage implements OnInit {
   public isHelpOpen: boolean = false;
   public isLoading: boolean = false;
   public map: any;
+  public openWindow: any = null;
 
   // Location data now managed by LocationService
   public locationAvailable: boolean = false;
@@ -78,6 +79,9 @@ export class HomePage implements OnInit {
 
   // Search properties
   public searchTerm: string = '';
+
+  // Add pagination tracking variables
+  private hasMorePages: boolean = true;
 
   constructor() {
     // Initialize the map callback function
@@ -97,9 +101,9 @@ export class HomePage implements OnInit {
 
   // Load Google Maps API script dynamically
   private loadGoogleMapsScript() {
-    if (!document.querySelectorAll(`[src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_hp1omiThAyvMfBxpdThM57Rl_JCyYek&callback=initMap"]`).length) {
+    if (!document.querySelectorAll(`[src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_hp1omiThAyvMfBxpdThM57Rl_JCyYek&loading=async&callback=initMap"]`).length) {
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyA_hp1omiThAyvMfBxpdThM57Rl_JCyYek&callback=initMap`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyA_hp1omiThAyvMfBxpdThM57Rl_JCyYek&loading=async&callback=initMap`;
       script.async = true;
       script.defer = true;
       document.body.appendChild(script);
@@ -222,13 +226,34 @@ export class HomePage implements OnInit {
           console.log(this.events);
           // Add markers to map if map is initialized
           this.addEventMarkersToMap();
-          //console.log(this.events);
-          // disable InfiniteScroll if total pages equals current page
-          /* if (scroll) {
-            scroll.target.disabled = res.total_pages === this.currentPage;
-          } */
+          
+          // Check if we've reached the last page
+          if (res.next) {
+            this.hasMorePages = true;
+          } else {
+            this.hasMorePages = false;
+          }
+          
+          // disable InfiniteScroll if we've reached the last page
+          if (scroll) {
+            scroll.target.disabled = !this.hasMorePages;
+          }
         },
       });
+  }
+
+  // Handle the infinite scroll event
+  loadMoreEvents(event: InfiniteScrollCustomEvent) {
+    if (!this.hasMorePages) {
+      event.target.disabled = true;
+      return;
+    }
+    
+    // Increment the page number
+    this.currentPage++;
+    
+    // Load the next page
+    this.loadEvents(event);
   }
 
   // Format date for display
@@ -279,12 +304,15 @@ export class HomePage implements OnInit {
     if (!this.searchTerm.trim()) {
       this.searchTerm = '';
       this.events = [];
+      this.currentPage = 1; // Reset to first page
+      this.hasMorePages = true; // Reset pagination state
       this.loadEvents(); // Will load events without search term
       return;
     }
 
     this.events = []; // Clear current events
     this.currentPage = 1; // Reset to first page
+    this.hasMorePages = true; // Reset pagination state
     
     // loadEvents will now use the current searchTerm
     this.loadEvents();
@@ -323,7 +351,12 @@ export class HomePage implements OnInit {
           `
         });
 
+        
         marker.addListener('click', () => {
+          if (this.openWindow) {
+            this.openWindow.close();
+          }
+          this.openWindow = infowindow;
           infowindow.open(this.map, marker);
         });
         
@@ -352,6 +385,8 @@ export class HomePage implements OnInit {
   clearSearch() {
     this.searchTerm = '';
     this.events = [];
+    this.currentPage = 1; // Reset to first page
+    this.hasMorePages = true; // Reset pagination state
     this.loadEvents(); // Will load events without search term
   }
 }

@@ -25,7 +25,7 @@ export class PredictHqService {
             date = new Date();
             date.setMonth(date.getMonth() + 3);
         }
-        return this.httpClient.get<ApiResult>(`${API_URL}?within=${maxDistance}km@${latitude},${longitude}&active.lte=${date.toISOString().split('T')[0]}&q=${query}&page=${page}`,
+        return this.httpClient.get<ApiResult>(`${API_URL}?within=${maxDistance}km@${latitude},${longitude}&active.lte=${date.toISOString().split('T')[0]}&q=${query}&page=${page}&limit=50`,
             {
                 headers: {
                     'Authorization': `Bearer ${API_KEY}`,
