@@ -34,4 +34,15 @@ export class PredictHqService {
             }
         );
     }
+
+    getEventById(id: string): Observable<any> {
+        return this.httpClient.get<any>(`${API_URL}?id=${id}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${API_KEY}`,
+                    "Accept": "application/json",
+                }
+            }
+        );
+    }
 }

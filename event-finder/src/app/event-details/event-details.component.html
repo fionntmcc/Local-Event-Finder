@@ -1,3 +1,20 @@
-<p>
-  event-details works!
-</p>
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="Back"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  @if (event(); as event) {
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title> {{ event.title }}</ion-card-title>
+      <ion-card-subtitle> {{ movie.description }}</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+    </ion-card-content>
+  </ion-card>
+  }
+</ion-content>
