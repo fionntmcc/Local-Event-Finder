@@ -18,16 +18,18 @@ export class PredictHqService {
     constructor() { }
 
     // return top movies on given page
-    getEvents(page = 1, latitude = 0, longitude = 0): Observable<ApiResult> {
-        return this.httpClient.get<ApiResult>(`${API_URL}?location_around.origin=${latitude},${longitude}&category=concerts,sports`
-            , {
+    getEvents(page = 1, latitude = 0, longitude = 0, query = "", date?: Date): Observable<ApiResult> {
+
+        if (!date) {
+            date = new Date();
+            date.setMonth(date.getMonth() + 1);
+        }
+        return this.httpClient.get<ApiResult>(`${API_URL}?within=10km@${latitude},${longitude}&active.lte=${date.toISOString().split('T')[0]}&q=${query}&page=${page}`,
+            {
                 headers: {
                     'Authorization': `Bearer ${API_KEY}`,
                     "Accept": "application/json",
-                },
-                /* params: {
-                    "q": "taylor swift",
-                } */
+                }
             }
         );
     }

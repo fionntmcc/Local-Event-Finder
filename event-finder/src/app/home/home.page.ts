@@ -11,8 +11,7 @@ import { NgFor, NgIf, NgStyle, TitleCasePipe } from '@angular/common';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { PredictHqService } from '../services/predict-hq/predict-hq.service'
 import { finalize, catchError } from 'rxjs';
-import { ApiResult, Event } from '../services/predict-hq/interfaces';
-import { google } from 'google-maps';
+import { Event } from '../services/predict-hq/interfaces';
 
 declare global {
   interface Window {
@@ -77,7 +76,6 @@ export class HomePage implements OnInit {
 
   // Search properties
   public searchTerm: string = '';
-  public filteredEvents: Event[] = [];
 
   constructor() {
     // Initialize the map callback function
@@ -105,7 +103,6 @@ export class HomePage implements OnInit {
     // reset variables
     this.currentPage = 1;
     this.events = [];
-    this.filteredEvents = [];
     this.searchTerm = '';
     this.error = null;
     this.id = "";
@@ -193,7 +190,7 @@ export class HomePage implements OnInit {
           map: this.map,
           title: 'Your Location',
           icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
+            path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
             scale: 10,
             fillColor: '#4285F4',
             fillOpacity: 1,
@@ -323,14 +320,14 @@ export class HomePage implements OnInit {
   // Search events based on searchTerm
   public searchEvents() {
     if (!this.searchTerm.trim()) {
-      this.filteredEvents = [];
+      this.events = [];
       this.addEventMarkersToMap();
       return;
     }
 
     const term = this.searchTerm.toLowerCase().trim();
 
-    this.filteredEvents = [];
+    this.events = [];
     
     this.loadEvents()
 
@@ -362,10 +359,9 @@ export class HomePage implements OnInit {
     this.markers = [];
     
     // Get events to display (filtered or all)
-    const eventsToDisplay = this.searchTerm ? this.filteredEvents : this.events;
     
     // Add new markers for filtered events
-    eventsToDisplay.forEach(event => {
+    this.events.forEach(event => {
       if (event.location && event.location.length >= 2) {
         const marker = new window.google.maps.Marker({
           position: { lat: event.location[1], lng: event.location[0] },
@@ -401,12 +397,12 @@ export class HomePage implements OnInit {
     });
     
     // If we have filtered events and there are results, center the map on the first result
-    if (this.searchTerm && this.filteredEvents.length > 0 && 
-        this.filteredEvents[0].location && 
-        this.filteredEvents[0].location.length >= 2) {
+    if (this.searchTerm && this.events.length > 0 && 
+        this.events[0].location && 
+        this.events[0].location.length >= 2) {
       this.map.setCenter({
-        lat: this.filteredEvents[0].location[1], 
-        lng: this.filteredEvents[0].location[0]
+        lat: this.events[0].location[1], 
+        lng: this.events[0].location[0]
       });
       this.map.setZoom(13);
     }
@@ -415,7 +411,7 @@ export class HomePage implements OnInit {
   // Clear search and reset to all events
   clearSearch() {
     this.searchTerm = '';
-    this.filteredEvents = [];
+    this.events = [];
     this.addEventMarkersToMap();
   }
 }
