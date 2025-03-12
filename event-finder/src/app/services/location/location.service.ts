@@ -97,4 +97,30 @@ export class LocationService {
   private toRad(degrees: number): number {
     return degrees * Math.PI / 180;
   }
+
+  /**
+   * Initialize location from storage data
+   * @param lat Latitude from storage
+   * @param lng Longitude from storage
+   */
+  setLocationFromStorage(lat: number, lng: number): void {
+    if (lat && lng) {
+      const mockPosition: Position = {
+        coords: {
+          latitude: lat,
+          longitude: lng,
+          accuracy: 0,
+          altitudeAccuracy: null,
+          altitude: null,
+          heading: null,
+          speed: null
+        },
+        timestamp: Date.now()
+      };
+      
+      this.currentPosition.next(mockPosition);
+      this.locationAvailable.next(true);
+      console.log('Location initialized from storage:', lat, lng);
+    }
+  }
 }

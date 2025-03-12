@@ -13,6 +13,7 @@ import { PredictHqService } from '../services/predict-hq/predict-hq.service'
 import { finalize, catchError } from 'rxjs';
 import { Event } from '../services/predict-hq/interfaces';
 import { LocationService } from '../services/location/location.service';
+import { StorageService } from '../services/storage/storage.service';
 
 declare global {
   interface Window {
@@ -58,6 +59,7 @@ export class HomePage implements OnInit {
   // inject PredictHqService
   private predictHqService = inject(PredictHqService);
   private locationService = inject(LocationService);
+  private storageService = inject(StorageService);
 
   // Necessary inits
   private currentPage: number = 1;
@@ -187,7 +189,6 @@ export class HomePage implements OnInit {
 
   // initialises events on page startup
   loadEvents(scroll?: InfiniteScrollCustomEvent) {
-
     this.error = null;
     this.isLoading = true;
 
@@ -195,8 +196,8 @@ export class HomePage implements OnInit {
     const latitude = this.locationService.getLatitude();
     const longitude = this.locationService.getLongitude();
 
-    // get events on currentPage
-    this.predictHqService.getEvents(this.currentPage, latitude, longitude).pipe(
+    // get events on currentPage, now including search term
+    this.predictHqService.getEvents(this.currentPage, latitude, longitude, this.searchTerm).pipe(
       finalize(() => {
         this.isLoading = false;
         if (scroll) {
@@ -276,34 +277,17 @@ export class HomePage implements OnInit {
   // Search events based on searchTerm
   public searchEvents() {
     if (!this.searchTerm.trim()) {
+      this.searchTerm = '';
       this.events = [];
-      this.addEventMarkersToMap();
+      this.loadEvents(); // Will load events without search term
       return;
     }
 
-    const term = this.searchTerm.toLowerCase().trim();
-
-    this.events = [];
+    this.events = []; // Clear current events
+    this.currentPage = 1; // Reset to first page
     
-    this.loadEvents()
-
-    /* 
-    this.filteredEvents = this.events.filter(event => {
-      return (
-        // Search by title
-        event.title?.toLowerCase().includes(term) ||
-        // Search by description
-        event.description?.toLowerCase().includes(term) ||
-        // Search by category
-        event.category?.toLowerCase().includes(term) ||
-        // Search by labels
-        event.labels?.some(label => label.toLowerCase().includes(term))
-      );
-    }); 
-    */
-
-    // Update map markers to show only filtered events
-    this.updateMapMarkersForSearch();
+    // loadEvents will now use the current searchTerm
+    this.loadEvents();
   }
   
   // Update map markers to display only filtered results
@@ -368,6 +352,6 @@ export class HomePage implements OnInit {
   clearSearch() {
     this.searchTerm = '';
     this.events = [];
-    this.addEventMarkersToMap();
+    this.loadEvents(); // Will load events without search term
   }
 }
