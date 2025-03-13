@@ -366,8 +366,6 @@ export class HomePage implements OnInit {
     this.markers.forEach(marker => marker.setMap(null));
     this.markers = [];
 
-    // Get events to display (filtered or all)
-
     // Add new markers for filtered events
     this.events.forEach(event => {
       if (event.location && event.location.length >= 2) {
@@ -378,20 +376,25 @@ export class HomePage implements OnInit {
           animation: window.google.maps.Animation.DROP
         });
 
-        // Add click listener to open info window
+        // Add click listener to open info window with improved styling
         const infowindow = new window.google.maps.InfoWindow({
           content: `
-          <div style="color: black;">
-            <h3>${event.title}</h3>
-            <p>${this.formatDate(event.start_local)}</p>
-            <p>${this.getDistance(event.location[1], event.location[0])}</p>
-            <p>${event.description || ''}</p>
-            <p>${event.labels?.join(', ') || ''}</p>
-            <button id="view-details-${event.id}" class="details-btn">View Details</button>
+          <div style="color: black; max-width: 250px; overflow: hidden;">
+            <h6 style="margin: 8px 0; font-size: 16px; font-weight: 600;">${event.title}</h6>
+            <p style="margin: 4px 0; font-size: 14px;"><strong>${this.formatDate(event.start_local)}</strong></p>
+            <p style="margin: 4px 0; font-size: 14px; color: #666;"><ion-icon name="location"></ion-icon> ${this.getDistance(event.location[1], event.location[0])} away</p>
+            <p style="margin: 6px 0; font-size: 13px; line-height: 1.3; max-height: 60px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+              ${this.truncateDescription(event.description.replace('Sourced from predicthq.com - ', ''), 100) || ''}
+            </p>
+            <button id="view-details-${event.id}" style="background-color: #3880ff; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 8px;">
+              View Details
+            </button>
           </div>
-          `
+          `,
+          disableAutoPan: false,
+          maxWidth: 270, // Limit max width
+          pixelOffset: new window.google.maps.Size(0, 0)
         });
-
 
         marker.addListener('click', () => {
           if (this.openWindow) {
