@@ -112,16 +112,13 @@ export class HomePage implements OnInit {
 
   ngOnInit() {
     this.loadGoogleMapsScript();
-    
+
     // Subscribe to position changes
     this.locationService.getCurrentPosition().subscribe(position => {
       if (position) {
         this.updateUserMarkerPosition(position);
       }
     });
-    this.categories = Object.keys(EventCategory).filter((item) => {
-      return isNaN(Number(item));
-  });
   }
 
   // Load Google Maps API script dynamically
@@ -145,10 +142,9 @@ export class HomePage implements OnInit {
     this.value = "";
     this.isHelpOpen = false;
     this.isLoading = true;
-    this.categories = Object.keys(EventCategory);
-    this.activeCategories = this.categories.map(() => false);
-    console.log("Categories: " + this.categories);
-    console.log("Active Categories: " + this.activeCategories);
+    this.categories = Object.keys(EventCategory).filter((item) => {
+      return isNaN(parseInt(item));
+    });
 
     // Use the location service to refresh location, then load events
     this.locationService.refreshLocation()
@@ -218,20 +214,20 @@ export class HomePage implements OnInit {
   // Add method to update user marker position
   private updateUserMarkerPosition(position: any) {
     if (!this.map || !this.mapInitialized) return;
-    
+
     const newPosition = {
       lat: position.coords.latitude,
       lng: position.coords.longitude
     };
-    
+
     // Update user marker position
     if (this.userMarker) {
       this.userMarker.setPosition(newPosition);
     }
-    
+
     // Update map center
     this.map.setCenter(newPosition);
-    
+
     // Save the current location to storage
     this.storageService.set('userLocation', {
       latitude: position.coords.latitude,
