@@ -7,22 +7,47 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <!-- Search Bar -->
+  <!-- Search Bar with embedded button -->
   <div class="search-container">
-    <ion-searchbar 
-      [(ngModel)]="searchTerm" 
-      (ionChange)="searchEvents()"
-      placeholder="Search events, categories or places"
-      animated
-      debounce="300"
-      show-clear-button="always">
-    </ion-searchbar>
+    <div class="search-wrapper">
+      <ion-searchbar 
+        [(ngModel)]="searchTerm" 
+        (ionChange)="searchEvents()"
+        placeholder="Search events, categories or places"
+        animated
+        debounce="300"
+        show-clear-button="always">
+      </ion-searchbar>
+      
+      <ion-button class="category-filter-btn" id="category-filter-btn" fill="clear">
+        Filter
+      </ion-button>
+    </div>
     
     <ion-chip *ngIf="searchTerm" (click)="clearSearch()" color="medium">
       <ion-label>Clear</ion-label>
-<!--       <ion-icon name="close-circle"></ion-icon> -->
     </ion-chip>
   </div>
+
+  <!-- Category Filter Popover -->
+  <ion-popover trigger="category-filter-btn" [dismissOnSelect]="false" side="bottom">
+    <ng-template>
+      <ion-content>
+        <ion-list lines="full">
+          <ion-list-header>
+            <ion-label>Event Categories</ion-label>
+          </ion-list-header>
+          <ion-item *ngFor="let category of categories">
+            <ion-checkbox [(ngModel)]="activeCategories" [value]="category" labelPlacement="end">{{ category | titlecase }}</ion-checkbox>
+          </ion-item>
+        </ion-list>
+        <div class="popover-footer">
+          <ion-button fill="outline" size="small" (click)="applyFilters()">Clear All</ion-button>
+          <ion-button (click)="applyFilters()">Apply</ion-button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-popover>
 
   <!-- Map Section -->
   <div class="map-container">

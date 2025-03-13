@@ -19,19 +19,24 @@ export class PredictHqService {
     constructor() { }
 
     // return top movies on given page
-    getEvents(page = 1, latitude = 0, longitude = 0, query = "", date?: Date, maxDistance = 20, eventCategories: EventCategory[] = []): Observable<ApiResult> {
+    getEvents(page = 1, latitude = 0, longitude = 0, query = "", eventCategories: string[] = [], maxDistance = 20, date?: Date): Observable<ApiResult> {
         
         // if no date, set furthest date for 3 months from now
         if (!date) {
             date = new Date();
             date.setMonth(date.getMonth() + 3);
         }
+
+        eventCategories = Object.keys(EventCategory).filter((item) => {
+            return isNaN(Number(item));
+        });
         
         // Construct category string
-        let categoryString = eventCategories.length > 0 ? `&category=${eventCategories.join(',')}` : '';
+        let categoryString = (eventCategories.length > 0 ? `&category=${eventCategories.join(',')}` : '');
+        // remove all spaces from categoryString
 
         let url = `${API_URL}?within=${maxDistance}km@${latitude},${longitude}&active.lte=${date.toISOString().split('T')[0]}&q=${query}&page=${page}&limit=50${categoryString}`;
-        
+
         console.log(url);
 
         return this.httpClient.get<ApiResult>(url,

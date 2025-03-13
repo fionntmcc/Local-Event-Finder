@@ -5,6 +5,9 @@ import {
   IonButton, IonPopover, InfiniteScrollCustomEvent, IonInfiniteScroll, IonInfiniteScrollContent,
   IonChip,
   IonLabel,
+  IonListHeader,
+  IonItem,
+  IonCheckbox,
   IonIcon, IonSearchbar, IonSpinner
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +19,7 @@ import { Event } from '../services/predict-hq/interfaces';
 import { LocationService } from '../services/location/location.service';
 import { StorageService } from '../services/storage.service';
 import { Router } from '@angular/router';
+import { EventCategory } from '../services/predict-hq/event-category';
 
 declare global {
   interface Window {
@@ -54,7 +58,10 @@ declare global {
     IonSearchbar,
     IonSpinner,
     FormsModule,
-    RouterLinkWithHref
+    IonCheckbox,
+    RouterLinkWithHref,
+    IonListHeader,
+    IonItem,
   ],
 })
 
@@ -75,7 +82,8 @@ export class HomePage implements OnInit {
   public isLoading: boolean = false;
   public map: any;
   public openWindow: any = null;
-
+  public categories: string[] = [];
+  public activeCategories: boolean[] = [];
   public center: any = null;
   public userMarker: any = null;
 
@@ -111,6 +119,9 @@ export class HomePage implements OnInit {
         this.updateUserMarkerPosition(position);
       }
     });
+    this.categories = Object.keys(EventCategory).filter((item) => {
+      return isNaN(Number(item));
+  });
   }
 
   // Load Google Maps API script dynamically
@@ -134,6 +145,10 @@ export class HomePage implements OnInit {
     this.value = "";
     this.isHelpOpen = false;
     this.isLoading = true;
+    this.categories = Object.keys(EventCategory);
+    this.activeCategories = this.categories.map(() => false);
+    console.log("Categories: " + this.categories);
+    console.log("Active Categories: " + this.activeCategories);
 
     // Use the location service to refresh location, then load events
     this.locationService.refreshLocation()
@@ -240,7 +255,7 @@ export class HomePage implements OnInit {
     const longitude = this.locationService.getLongitude();
 
     // get events on currentPage, now including search term
-    this.predictHqService.getEvents(this.currentPage, latitude, longitude, this.searchTerm).pipe(
+    this.predictHqService.getEvents(this.currentPage, latitude, longitude, this.searchTerm, this.categories).pipe(
       finalize(() => {
         this.isLoading = false;
         if (scroll) {
@@ -382,7 +397,7 @@ export class HomePage implements OnInit {
           <div style="color: black; max-width: 250px; overflow: hidden;">
             <h6 style="margin: 8px 0; font-size: 16px; font-weight: 600;">${event.title}</h6>
             <p style="margin: 4px 0; font-size: 14px;"><strong>${this.formatDate(event.start_local)}</strong></p>
-            <p style="margin: 4px 0; font-size: 14px; color: #666;"><ion-icon name="location"></ion-icon> ${this.getDistance(event.location[1], event.location[0])} away</p>
+            <p style="margin: 4px 0; font-size: 14px; color: #666;"><ion-icon name="location"></ionicon> ${this.getDistance(event.location[1], event.location[0])} away</p>
             <p style="margin: 6px 0; font-size: 13px; line-height: 1.3; max-height: 60px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
               ${this.truncateDescription(event.description.replace('Sourced from predicthq.com - ', ''), 100) || ''}
             </p>
@@ -433,6 +448,14 @@ export class HomePage implements OnInit {
       });
       this.map.setZoom(13);
     }
+  }
+
+  applyFilters() {
+    this.activeCategories = [...this.activeCategories];
+    this.events = [];
+    this.currentPage = 1; // Reset to first page
+    this.hasMorePages = true; // Reset pagination state
+    this.loadEvents(); // Will load events with selected categories
   }
 
   // Clear search and reset to all events
