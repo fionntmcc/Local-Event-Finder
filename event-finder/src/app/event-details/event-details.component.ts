@@ -9,7 +9,7 @@ import {
   IonInput, IonRadio, IonBadge, IonSpinner
 } from '@ionic/angular/standalone';
 import { PredictHqService } from '../services/predict-hq/predict-hq.service';
-import { StorageService } from '../services/storage/storage.service';
+import { StorageService } from '../services/storage.service';
 import { LocationService } from '../services/location/location.service';
 import { ApiResult } from '../services/predict-hq/interfaces';
 import { Browser } from '@capacitor/browser';

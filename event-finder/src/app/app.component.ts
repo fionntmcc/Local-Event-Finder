@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { LocationService } from './services/location/location.service';
-import { StorageService } from './services/storage/storage.service';
+import { StorageService } from './services/storage.service';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +16,7 @@ export class AppComponent {
 
     locationService.getCurrentPosition().subscribe((position) => {
       console.log('Current position', position);
-      storageService.setItem('currentPosition', position);
+      storageService.set('currentPosition', position);
     });
   }
 }

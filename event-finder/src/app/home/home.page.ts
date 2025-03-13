@@ -4,7 +4,7 @@ import {
   IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonButton, IonPopover, InfiniteScrollCustomEvent, IonInfiniteScroll, IonInfiniteScrollContent,
   IonChip,
-  IonLabel, 
+  IonLabel,
   IonIcon, IonSearchbar, IonSpinner
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +14,7 @@ import { PredictHqService } from '../services/predict-hq/predict-hq.service'
 import { finalize, catchError } from 'rxjs';
 import { Event } from '../services/predict-hq/interfaces';
 import { LocationService } from '../services/location/location.service';
-import { StorageService } from '../services/storage/storage.service';
+import { StorageService } from '../services/storage.service';
 import { Router } from '@angular/router';
 
 declare global {
@@ -76,6 +76,9 @@ export class HomePage implements OnInit {
   public map: any;
   public openWindow: any = null;
 
+  public center: any = null;
+  public userMarker: any = null;
+
   // Location data now managed by LocationService
   public locationAvailable: boolean = false;
   private mapInitialized = false;
@@ -92,7 +95,7 @@ export class HomePage implements OnInit {
     window.initMap = () => {
       this.initializeMap();
     };
-    
+
     // Subscribe to location availability
     this.locationService.isLocationAvailable().subscribe(available => {
       this.locationAvailable = available;
@@ -101,6 +104,13 @@ export class HomePage implements OnInit {
 
   ngOnInit() {
     this.loadGoogleMapsScript();
+    
+    // Subscribe to position changes
+    this.locationService.getCurrentPosition().subscribe(position => {
+      if (position) {
+        this.updateUserMarkerPosition(position);
+      }
+    });
   }
 
   // Load Google Maps API script dynamically
@@ -127,7 +137,9 @@ export class HomePage implements OnInit {
 
     // Use the location service to refresh location, then load events
     this.locationService.refreshLocation()
-      .then(() => {
+      .then((position) => {
+        // Update user marker position and map center if initialized
+        this.updateUserMarkerPosition(position);
         this.loadEvents();
       })
       .catch(error => {
@@ -149,9 +161,9 @@ export class HomePage implements OnInit {
       this.mapInitialized = true;
 
       // Use location service to get coordinates
-      const center = { 
-        lat: this.locationService.getLatitude(), 
-        lng: this.locationService.getLongitude() 
+      const center = {
+        lat: this.locationService.getLatitude(),
+        lng: this.locationService.getLongitude()
       };
 
       this.map = new window.google.maps.Map(mapElement, {
@@ -168,26 +180,49 @@ export class HomePage implements OnInit {
         streetViewControl: false
       });
 
-      // Add a marker for the user's location
-      if (this.locationAvailable) {
-        new window.google.maps.Marker({
-          position: center,
-          map: this.map,
-          title: 'Your Location',
-          icon: {
-            path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-            scale: 10,
-            fillColor: '#4285F4',
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 2
-          }
-        });
-      }
+      // Add a marker for the user's location and store reference
+      this.userMarker = new window.google.maps.Marker({
+        position: center,
+        map: this.map,
+        title: 'Your Location',
+        icon: {
+          path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          scale: 10,
+          fillColor: '#4285F4',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2
+        }
+      });
 
       // Add event markers when events are loaded
       this.addEventMarkersToMap();
     }
+  }
+
+  // Add method to update user marker position
+  private updateUserMarkerPosition(position: any) {
+    if (!this.map || !this.mapInitialized) return;
+    
+    const newPosition = {
+      lat: position.coords.latitude,
+      lng: position.coords.longitude
+    };
+    
+    // Update user marker position
+    if (this.userMarker) {
+      this.userMarker.setPosition(newPosition);
+    }
+    
+    // Update map center
+    this.map.setCenter(newPosition);
+    
+    // Save the current location to storage
+    this.storageService.set('userLocation', {
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+      timestamp: position.timestamp
+    });
   }
 
   // Add event markers to map
@@ -230,14 +265,14 @@ export class HomePage implements OnInit {
           console.log(this.events);
           // Add markers to map if map is initialized
           this.addEventMarkersToMap();
-          
+
           // Check if we've reached the last page
           if (res.next) {
             this.hasMorePages = true;
           } else {
             this.hasMorePages = false;
           }
-          
+
           // disable InfiniteScroll if we've reached the last page
           if (scroll) {
             scroll.target.disabled = !this.hasMorePages;
@@ -252,10 +287,10 @@ export class HomePage implements OnInit {
       event.target.disabled = true;
       return;
     }
-    
+
     // Increment the page number
     this.currentPage++;
-    
+
     // Load the next page
     this.loadEvents(event);
   }
@@ -317,21 +352,22 @@ export class HomePage implements OnInit {
     this.events = []; // Clear current events
     this.currentPage = 1; // Reset to first page
     this.hasMorePages = true; // Reset pagination state
-    
+    console.log('Searching for:', this.searchTerm);
+
     // loadEvents will now use the current searchTerm
     this.loadEvents();
   }
-  
+
   // Update map markers to display only filtered results
   updateMapMarkersForSearch() {
     if (!this.map || !window.google) return;
-    
+
     // Clear existing markers
     this.markers.forEach(marker => marker.setMap(null));
     this.markers = [];
-    
+
     // Get events to display (filtered or all)
-    
+
     // Add new markers for filtered events
     this.events.forEach(event => {
       if (event.location && event.location.length >= 2) {
@@ -341,7 +377,7 @@ export class HomePage implements OnInit {
           title: event.title,
           animation: window.google.maps.Animation.DROP
         });
-        
+
         // Add click listener to open info window
         const infowindow = new window.google.maps.InfoWindow({
           content: `
@@ -356,14 +392,14 @@ export class HomePage implements OnInit {
           `
         });
 
-        
+
         marker.addListener('click', () => {
           if (this.openWindow) {
             this.openWindow.close();
           }
           this.openWindow = infowindow;
           infowindow.open(this.map, marker);
-          
+
           // Add click event after info window is opened
           setTimeout(() => {
             const detailsBtn = document.getElementById(`view-details-${event.id}`);
@@ -374,28 +410,28 @@ export class HomePage implements OnInit {
             }
           }, 300);
         });
-        
+
         // Close popup if clicked outside
-        window.google.maps.event.addListener(this.map, 'click', function() {
+        window.google.maps.event.addListener(this.map, 'click', function () {
           infowindow.close();
         });
-        
+
         this.markers.push(marker);
       }
     });
-    
+
     // If we have filtered events and there are results, center the map on the first result
-    if (this.searchTerm && this.events.length > 0 && 
-        this.events[0].location && 
-        this.events[0].location.length >= 2) {
+    if (this.searchTerm && this.events.length > 0 &&
+      this.events[0].location &&
+      this.events[0].location.length >= 2) {
       this.map.setCenter({
-        lat: this.events[0].location[1], 
+        lat: this.events[0].location[1],
         lng: this.events[0].location[0]
       });
       this.map.setZoom(13);
     }
   }
-  
+
   // Clear search and reset to all events
   clearSearch() {
     this.searchTerm = '';
@@ -404,7 +440,7 @@ export class HomePage implements OnInit {
     this.hasMorePages = true; // Reset pagination state
     this.loadEvents(); // Will load events without search term
   }
-  
+
   // Add a method to navigate to event details
   navigateToEventDetails(eventId: string) {
     this.router.navigate(['/event', eventId]);
