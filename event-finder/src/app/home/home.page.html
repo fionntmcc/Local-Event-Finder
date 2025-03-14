@@ -69,51 +69,24 @@
 
   <div *ngIf="error" class="ion-text-center ion-padding">
     <ion-text color="danger">
-      <p>{{ error }}</p>\
+      <p>{{ error }}</p>
     </ion-text>
   </div>
 
   <!-- Display filtered events if search is active, otherwise display all events -->
   <ion-list *ngIf="events.length > 0">
-    <ion-card *ngFor="let event of events" class="event-card" [routerLink]="['/event', event.id]">
-      <div class="event-background" [ngStyle]="{'background-image': 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), url(https://source.unsplash.com/400x200/photos/random/?event)'}">
-        <ion-card-header>
-          <ion-chip *ngIf="event.category" class="category-chip">
-            {{ event.category | titlecase }}
-          </ion-chip>
-          <ion-card-title class="event-title">{{ event.title }}</ion-card-title>
-        </ion-card-header>
-        
-        <ion-card-content class="event-content">
-          <div class="event-details">
-            <div class="event-info">
-              <!-- <ion-icon name="calendar-outline"></ion-icon> -->
-              <span>{{ formatDate(event.start_local) }}</span>
-            </div>
-            
-            <div class="event-info" *ngIf="event.location && event.location.length >= 2">
-              <!-- <ion-icon name="location-outline"></ion-icon> -->
-              <span>{{ getDistance(event.location[1], event.location[0]) }} away</span>
-            </div>
-            
-            <div class="event-info" *ngIf="event.predicted_event_spend > 0">
-              <!-- <ion-icon name="wallet-outline"></ion-icon> -->
-              <span>Est. cost: {{ formatCurrency(event.predicted_event_spend) }}</span>
-            </div>
-          </div>
-          
-          <div class="event-description" *ngIf="event.description">
-            <p>{{ truncateDescription(event.description, 120) }}</p>
-          </div>
-          
-          <div class="event-labels" *ngIf="event.labels && event.labels.length > 0">
-            <ion-chip *ngFor="let label of getLimitedLabels(event.labels, 3)" class="small-chip">
-              {{ label }}
-            </ion-chip>
-          </div>
-        </ion-card-content>
-      </div>
-    </ion-card>
+    <ion-item *ngFor="let event of events" class="event-item" [routerLink]="['/event', event.id]">
+      <ion-label>
+        <h2>{{ event.title }}</h2>
+        <p>{{ formatDate(event.start_local) }}</p>
+        <p *ngIf="event.location && event.location.length >= 2">{{ getDistance(event.location[1], event.location[0]) }} away</p>
+        <p *ngIf="event.predicted_event_spend > 0">Est. cost: {{ formatCurrency(event.predicted_event_spend) }}</p>
+        <p *ngIf="event.description">{{ truncateDescription(event.description, 120) }}</p>
+        <ion-chip *ngFor="let label of getLimitedLabels(event.labels, 3)" class="small-chip">
+          {{ label }}
+        </ion-chip>
+      </ion-label>
+    </ion-item>
   </ion-list>
 
   <ion-infinite-scroll (ionInfinite)="loadMoreEvents($event)" *ngIf="!searchTerm">

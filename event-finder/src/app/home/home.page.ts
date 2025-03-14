@@ -8,7 +8,7 @@ import {
   IonListHeader,
   IonItem,
   IonCheckbox,
-  IonIcon, IonSearchbar, IonSpinner
+  IonIcon, IonSearchbar, IonSpinner,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, NgStyle, TitleCasePipe } from '@angular/common';
