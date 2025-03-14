@@ -10,147 +10,107 @@
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <!-- Main Event Card -->
-  <ion-card *ngIf="event" class="event-card">
+  <ion-list *ngIf="event" class="event-list">
     <!-- Event Header with Date Display -->
-    <div class="event-header">
-      <ion-card-header>
-        <div class="title-container">
-          <ion-card-title class="event-title">{{ event.title }}</ion-card-title>
-          <ion-badge color="primary" *ngIf="event.category" class="category-badge">
-            {{ event.category }}
-          </ion-badge>
-        </div>
-        <div class="date-time-container">
-          <div class="date-box">
-            <div class="month">{{ event.start | date: 'MMM' | uppercase }}</div>
-            <div class="day">{{ event.start | date: 'dd' }}</div>
-          </div>
-          <div class="time-details">
-            <div class="time"><ion-icon name="time-outline"></ion-icon> {{ event.start | date: 'shortTime' }}</div>
-            <div class="full-date">{{ event.start | date: 'fullDate' }}</div>
-          </div>
-        </div>
-      </ion-card-header>
-    </div>
+    <ion-item>
+      <ion-label>
+        <h2>{{ event.title }}</h2>
+        <p>{{ event.category }}</p>
+      </ion-label>
+      <ion-badge slot="end" color="primary" *ngIf="event.category">{{ event.category }}</ion-badge>
+    </ion-item>
+    <ion-item>
+      <ion-label>
+        <h3>Date & Time</h3>
+        <p>{{ event.start | date: 'fullDate' }} at {{ event.start | date: 'shortTime' }}</p>
+      </ion-label>
+    </ion-item>
 
     <!-- Event Image if Available -->
-    <div *ngIf="event.image" class="event-image-container">
-      <img [src]="event.image" class="event-image" alt="{{ event.title }}">
-    </div>
+    <ion-item *ngIf="event.image">
+      <ion-img [src]="event.image" alt="{{ event.title }}"></ion-img>
+    </ion-item>
 
-    <ion-card-content>
-      <!-- Location Information -->
-      <div class="info-section" *ngIf="event.location">
-        <h3 class="section-title">
-          <ion-icon name="location-outline" color="danger"></ion-icon> Location
-        </h3>
-        <div class="location-details">
-          <p *ngIf="event.place || event.venue" class="venue-name">
-            {{ event.place || event.venue }}
-          </p>
-          <p *ngIf="event.address" class="address">{{ event.address }}</p>
-          <p *ngIf="event.country" class="country">{{ event.country }}</p>
-        </div>
-      </div>
+    <!-- Location Information -->
+    <ion-item *ngIf="event.location">
+      <ion-label>
+        <h3>Location</h3>
+        <p>{{ event.place || event.venue }}</p>
+        <p>{{ event.address }}</p>
+        <p>{{ event.country }}</p>
+      </ion-label>
+    </ion-item>
 
-      <!-- Description Section -->
-      <div class="info-section" *ngIf="event.description">
-        <h3 class="section-title">
-          <ion-icon name="information-circle-outline" color="primary"></ion-icon> About This Event
-        </h3>
-        <p class="description">{{ event.description }}</p>
-      </div>
+    <!-- Description Section -->
+    <ion-item *ngIf="event.description">
+      <ion-label>
+        <h3>About This Event</h3>
+        <p>{{ event.description }}</p>
+      </ion-label>
+    </ion-item>
 
-      <!-- Tags/Labels -->
-      <div class="info-section" *ngIf="event.labels && event.labels.length > 0">
-        <h3 class="section-title">
-          <ion-icon name="pricetag-outline" color="tertiary"></ion-icon> Tags
-        </h3>
+    <!-- Tags/Labels -->
+    <ion-item *ngIf="event.labels && event.labels.length > 0">
+      <ion-label>
+        <h3>Tags</h3>
         <div class="tags-container">
           <ion-badge *ngFor="let label of event.labels" class="tag" color="light">
             {{ label }}
           </ion-badge>
         </div>
-      </div>
+      </ion-label>
+    </ion-item>
 
-      <!-- Additional Details -->
-      <div class="info-section">
-        <h3 class="section-title">
-          <ion-icon name="list-outline" color="success"></ion-icon> Event Details
-        </h3>
-        
+    <!-- Additional Details -->
+    <ion-item>
+      <ion-label>
+        <h3>Event Details</h3>
         <!-- Status -->
-        <div class="detail-item" *ngIf="event.state">
-          <span class="detail-label">Status:</span>
-          <ion-badge [color]="event.state === 'active' ? 'success' : 'medium'" class="status-badge">
-            {{ event.state }}
-          </ion-badge>
-        </div>
-
+        <p *ngIf="event.state">
+          <strong>Status:</strong>
+          <ion-badge [color]="event.state === 'active' ? 'success' : 'medium'">{{ event.state }}</ion-badge>
+        </p>
         <!-- Rank -->
-        <div class="detail-item" *ngIf="event.rank">
-          <span class="detail-label">Popularity:</span>
-          <div class="rank-indicator">
-            <div class="rank-bar" [style.width.%]="(event.rank/100) * 100"></div>
-          </div>
-          <span class="rank-value">{{ event.rank }}</span>
-        </div>
-
-        <!-- First Seen -->
-        <div class="detail-item" *ngIf="event.first_seen">
-          <span class="detail-label">First Listed:</span>
-          <span>{{ event.first_seen | date: 'mediumDate' }}</span>
-        </div>
         
-        <!-- Attendance -->
-        <div class="detail-item" *ngIf="event.scope === 'locality'">
-          <span class="detail-label">Scope:</span>
-          <span>Local Event</span>
-        </div>
-        <div class="detail-item" *ngIf="event.scope === 'region'">
-          <span class="detail-label">Scope:</span>
-          <span>Regional Event</span>
-        </div>
-        <div class="detail-item" *ngIf="event.scope === 'national'">
-          <span class="detail-label">Scope:</span>
-          <span>National Event</span>
-        </div>
-        <div class="detail-item" *ngIf="event.scope === 'international'">
-          <span class="detail-label">Scope:</span>
-          <span>International Event</span>
-        </div>
-      </div>
+        <!-- First Seen -->
+        <p *ngIf="event.first_seen">
+          <strong>First Listed:</strong>
+          <span>{{ event.first_seen | date: 'mediumDate' }}</span>
+        </p>
+        <!-- Scope -->
+        <p *ngIf="event.scope">
+          <strong>Scope:</strong>
+          <span>{{ event.scope | titlecase }} Event</span>
+        </p>
+      </ion-label>
+    </ion-item>
 
-      <!-- Pricing Information -->
-      <div class="info-section" *ngIf="event.ticket_price_min || event.ticket_price_max">
-        <h3 class="section-title">
-          <ion-icon name="cash-outline" color="success"></ion-icon> Pricing
-        </h3>
-        <div class="pricing-details">
-          <div *ngIf="event.ticket_price_min && event.ticket_price_max" class="price-range">
-            <span>{{ event.ticket_price_min | currency }} - {{ event.ticket_price_max | currency }}</span>
-          </div>
-          <div *ngIf="event.ticket_price_min && !event.ticket_price_max" class="price-single">
-            <span>From {{ event.ticket_price_min | currency }}</span>
-          </div>
-        </div>
-      </div>
-    </ion-card-content>
-    
+    <!-- Pricing Information -->
+    <ion-item *ngIf="event.ticket_price_min || event.ticket_price_max">
+      <ion-label>
+        <h3>Pricing</h3>
+        <p *ngIf="event.ticket_price_min && event.ticket_price_max">
+          <span>{{ event.ticket_price_min | currency }} - {{ event.ticket_price_max | currency }}</span>
+        </p>
+        <p *ngIf="event.ticket_price_min && !event.ticket_price_max">
+          <span>From {{ event.ticket_price_min | currency }}</span>
+        </p>
+      </ion-label>
+    </ion-item>
+
     <!-- Action Buttons -->
-    <div class="action-buttons">
+    <ion-item>
       <ion-button expand="block" *ngIf="event.url" (click)="openEventWebsite()" color="primary">
         <ion-icon name="globe-outline" slot="start"></ion-icon>
         Visit Website
       </ion-button>
-      
       <ion-button expand="block" *ngIf="event.location" (click)="getDirections()" color="secondary">
         <ion-icon name="navigate-outline" slot="start"></ion-icon>
         Get Directions
       </ion-button>
-    </div>
-  </ion-card>
-  
+    </ion-item>
+  </ion-list>
+
   <!-- Loading State -->
   <div *ngIf="!event" class="loading-container">
     <ion-spinner name="circular"></ion-spinner>

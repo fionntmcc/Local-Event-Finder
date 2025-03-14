@@ -6,7 +6,7 @@ import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonIcon, IonCard, IonCardHeader,
   IonCardTitle, IonCardSubtitle, IonCardContent, IonText, IonLabel, IonButtons,
   IonButton, IonBackButton, IonItem, IonNav, IonAvatar, IonToggle, IonPopover,
-  IonInput, IonRadio, IonBadge, IonSpinner
+  IonInput, IonRadio, IonBadge, IonSpinner, IonList
 } from '@ionic/angular/standalone';
 import { PredictHqService } from '../services/predict-hq/predict-hq.service';
 import { StorageService } from '../services/storage.service';
