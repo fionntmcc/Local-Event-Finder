@@ -38,7 +38,7 @@
             <ion-label>Event Categories</ion-label>
           </ion-list-header>
           <ion-item *ngFor="let category of categories">
-            <ion-checkbox [value]="category" labelPlacement="end">{{ category | titlecase }}</ion-checkbox>
+            <ion-checkbox [value]="category" (click)="toggleCategory(category)" labelPlacement="end">{{ category | titlecase }}</ion-checkbox>
           </ion-item>
         </ion-list>
         <div class="popover-footer">

@@ -27,6 +27,7 @@ export class PredictHqService {
             date.setMonth(date.getMonth() + 3);
         }
 
+        console.log("Events: " + eventCategories);
         eventCategories = Object.keys(EventCategory).filter((item) => {
             return isNaN(Number(item));
         });

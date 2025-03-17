@@ -6,7 +6,7 @@ import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonIcon, IonCard, IonCardHeader,
   IonCardTitle, IonCardSubtitle, IonCardContent, IonText, IonLabel, IonButtons,
   IonButton, IonBackButton, IonItem, IonNav, IonAvatar, IonToggle, IonPopover,
-  IonInput, IonRadio, IonBadge, IonSpinner, IonList
+  IonInput, IonRadio, IonBadge, IonSpinner, IonList, IonImg
 } from '@ionic/angular/standalone';
 import { PredictHqService } from '../services/predict-hq/predict-hq.service';
 import { StorageService } from '../services/storage.service';
@@ -26,7 +26,7 @@ import { FormsModule } from '@angular/forms';
     IonCardTitle, IonCardSubtitle, IonCardContent, IonText, IonLabel, IonButtons,
     IonButton, IonBackButton, IonItem, DatePipe, CurrencyPipe, IonNav, IonAvatar,
     RouterLinkWithHref, IonToggle, IonPopover, IonInput, IonRadio, FormsModule,
-    IonBadge, IonSpinner
+    IonBadge, IonSpinner, IonList, IonImg
   ]
 })
 export class EventDetailsPage implements OnInit {

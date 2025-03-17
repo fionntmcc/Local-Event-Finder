@@ -20,6 +20,7 @@ import { LocationService } from '../services/location/location.service';
 import { StorageService } from '../services/storage.service';
 import { Router } from '@angular/router';
 import { EventCategory } from '../services/predict-hq/event-category';
+import { act } from 'react';
 
 declare global {
   interface Window {
@@ -145,6 +146,7 @@ export class HomePage implements OnInit {
     this.categories = Object.keys(EventCategory).filter((item) => {
       return isNaN(parseInt(item));
     });
+    this.activeCategories = this.categories.map(() => false);
 
     // Use the location service to refresh location, then load events
     this.locationService.refreshLocation()
@@ -250,8 +252,16 @@ export class HomePage implements OnInit {
     const latitude = this.locationService.getLatitude();
     const longitude = this.locationService.getLongitude();
 
+    let currentActiveCategories : string[] = [];
+    this.activeCategories.forEach((active, index) => {
+      if (active) {
+        currentActiveCategories.push(this.categories[index]); 
+      }
+    });
+    console.log('Current active categories:', currentActiveCategories); 
+
     // get events on currentPage, now including search term
-    this.predictHqService.getEvents(this.currentPage, latitude, longitude, this.searchTerm, this.categories).pipe(
+    this.predictHqService.getEvents(this.currentPage, latitude, longitude, this.searchTerm, currentActiveCategories).pipe(
       finalize(() => {
         this.isLoading = false;
         if (scroll) {
@@ -447,7 +457,6 @@ export class HomePage implements OnInit {
   }
 
   applyFilters() {
-    this.activeCategories = [...this.activeCategories];
     this.events = [];
     this.currentPage = 1; // Reset to first page
     this.hasMorePages = true; // Reset pagination state
@@ -461,6 +470,14 @@ export class HomePage implements OnInit {
     this.currentPage = 1; // Reset to first page
     this.hasMorePages = true; // Reset pagination state
     this.loadEvents(); // Will load events without search term
+  }
+
+  toggleCategory(category: string) {
+    const index = this.categories.indexOf(category);
+    if (index > -1) {
+      this.activeCategories[index] = !this.activeCategories[index];
+      console.log('Active categories:', this.activeCategories);
+    }
   }
 
   // Add a method to navigate to event details
