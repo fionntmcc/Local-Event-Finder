@@ -5,6 +5,7 @@
       </ion-back-button>
     </ion-buttons>
     <ion-title>Event Details</ion-title>
+    <ion-toggle slot="end" [(ngModel)]="eventStatus" (ionChange)="toggleEventStatus()"></ion-toggle>
   </ion-toolbar>
 </ion-header>
 
@@ -97,18 +98,6 @@
         </p>
       </ion-label>
     </ion-item>
-
-    <!-- Action Buttons -->
-    <ion-item>
-      <ion-button expand="block" *ngIf="event.url" (click)="openEventWebsite()" color="primary">
-        <ion-icon name="globe-outline" slot="start"></ion-icon>
-        Visit Website
-      </ion-button>
-      <ion-button expand="block" *ngIf="event.location" (click)="getDirections()" color="secondary">
-        <ion-icon name="navigate-outline" slot="start"></ion-icon>
-        Get Directions
-      </ion-button>
-    </ion-item>
   </ion-list>
 
   <!-- Loading State -->
@@ -116,4 +105,18 @@
     <ion-spinner name="circular"></ion-spinner>
     <p>Loading event details...</p>
   </div>
+
+  <!-- Action Buttons -->
+  <ion-button expand="block" *ngIf="event.url" (click)="openEventWebsite()" color="primary">
+    <ion-icon name="globe-outline" slot="start"></ion-icon>
+    Visit Website
+  </ion-button>
+  <ion-button expand="block" *ngIf="event.location" (click)="getDirections()" color="secondary">
+    <ion-icon name="navigate-outline" slot="start"></ion-icon>
+    Get Directions
+  </ion-button>
+  <ion-button expand="block" (click)="shareEvent()" color="secondary">
+    <ion-icon name="navigate-outline" slot="start"></ion-icon>
+    Share
+  </ion-button>
 </ion-content>

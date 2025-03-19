@@ -11,9 +11,9 @@ import {
 import { PredictHqService } from '../services/predict-hq/predict-hq.service';
 import { StorageService } from '../services/storage.service';
 import { LocationService } from '../services/location/location.service';
-import { ApiResult } from '../services/predict-hq/interfaces';
 import { Browser } from '@capacitor/browser';
 import { FormsModule } from '@angular/forms';
+import { Event } from '../services/predict-hq/interfaces';
 
 @Component({
   selector: 'app-details',
@@ -42,6 +42,8 @@ export class EventDetailsPage implements OnInit {
   public homepage: string = "";
   public status: string = "";
   public eventId: string = "";
+  public eventStatus: boolean = false;
+  public storedEvents: Event[] = [];
 
   constructor() {}
 
@@ -52,6 +54,17 @@ export class EventDetailsPage implements OnInit {
       if (id) {
         this.eventId = id;
         this.loadEventDetails(id);
+
+        this.storageService.get("events").then((events) => {
+          if (events) {
+            this.storedEvents = events;
+            this.eventStatus = this.storedEvents.some((event) => event.id === id);
+            console.log("status" + this.eventStatus);
+            console.log("events" + this.storedEvents);
+          }
+        }).catch((err) => {
+          console.error(err);
+        });
       }
     });
   }
@@ -85,6 +98,32 @@ export class EventDetailsPage implements OnInit {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
     
     Browser.open({url});
+  }
+
+  shareEvent() {
+    if (!this.event) return;
+
+    const title = this.event.title;
+    const url = this.event.url || `https://event-finder.com/event/${this.event.id}`;
+    const text = `Check out this event: ${title} - ${url}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title,
+        text,
+        url
+      });
+    }
+  }
+
+  toggleEventStatus() {
+    if (!this.event) return;
+    this.eventStatus = !this.eventStatus;
+    if (this.eventStatus) {
+      this.storedEvents.push(this.event);
+    } else {
+      this.storedEvents = this.storedEvents.filter((event) => event.id !== this.eventId);
+    }
   }
 
   getDistance(): string {

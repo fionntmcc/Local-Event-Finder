@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Profile
+      Evie
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -9,9 +9,38 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Profile</ion-title>
+      <ion-title size="large">Evie</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <app-explore-container name="Profile page"></app-explore-container>
+  <ion-list>
+    <ion-item lines="none">
+      <ion-avatar slot="start">
+        <img src="assets/profile-picture.jpg" />
+      </ion-avatar>
+    </ion-item>
+    <ion-item>
+      <ion-label>Email</ion-label>
+      <ion-note slot="end">evie123</ion-note>
+    </ion-item>
+    <ion-item>
+      <ion-label>Password</ion-label>
+      <ion-note slot="end">***************</ion-note>
+    </ion-item>
+    <ion-item>
+      <ion-label>Phone</ion-label>
+      <ion-note slot="end">+ (353) 87 111 1111</ion-note>
+    </ion-item>
+    <ion-item>
+      <ion-label>Location</ion-label>
+      <ion-note slot="end">Galway, Ireland</ion-note>
+    </ion-item>
+    <ion-item>
+      <ion-label>Currency</ion-label>
+      <ion-note slot="end">EUR (€)</ion-note>
+    </ion-item>
+    <ion-item lines="none">
+      <ion-label color="danger">Logout</ion-label>
+    </ion-item>
+  </ion-list>
 </ion-content>
