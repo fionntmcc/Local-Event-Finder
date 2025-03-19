@@ -2,7 +2,7 @@
 import { Component, Input, OnInit, WritableSignal, inject, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLinkWithHref, ActivatedRoute } from '@angular/router';
-import { 
+import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonIcon, IonCard, IonCardHeader,
   IonCardTitle, IonCardSubtitle, IonCardContent, IonText, IonLabel, IonButtons,
   IonButton, IonBackButton, IonItem, IonNav, IonAvatar, IonToggle, IonPopover,
@@ -42,10 +42,11 @@ export class EventDetailsPage implements OnInit {
   public homepage: string = "";
   public status: string = "";
   public eventId: string = "";
+  public eventIds : Map<String, String> = new Map<String, String>();
   public eventStatus: boolean = false;
   public storedEvents: Event[] = [];
 
-  constructor() {}
+  constructor() { }
 
   ngOnInit() {
     // Get event ID from route parameters
@@ -54,18 +55,14 @@ export class EventDetailsPage implements OnInit {
       if (id) {
         this.eventId = id;
         this.loadEventDetails(id);
-
-        this.storageService.get("events").then((events) => {
-          if (events) {
-            this.storedEvents = events;
-            this.eventStatus = this.storedEvents.some((event) => event.id === id);
-            console.log("status" + this.eventStatus);
-            console.log("events" + this.storedEvents);
-          }
-        }).catch((err) => {
-          console.error(err);
-        });
       }
+      this.storageService.get("events").then((events) => {
+        if (this.eventIds.has(this.eventId)) {
+          this.eventStatus = true;
+        }
+      }).catch((err) => {
+        console.error(err);
+      });
     });
   }
 
@@ -73,7 +70,7 @@ export class EventDetailsPage implements OnInit {
     this.predictHqService.getEventById(id).subscribe((res) => {
       if (res && res.results && res.results.length > 0) {
         this.event = res.results[0];
-        
+
         // Set homepage URL if available
         if (this.event.url) {
           this.homepage = this.event.url;
@@ -84,20 +81,20 @@ export class EventDetailsPage implements OnInit {
 
   async openEventWebsite() {
     if (this.homepage) {
-      await Browser.open({url: this.homepage});
+      await Browser.open({ url: this.homepage });
     } else if (this.event && this.event.url) {
-      await Browser.open({url: this.event.url});
+      await Browser.open({ url: this.event.url });
     }
   }
 
   getDirections() {
     if (!this.event || !this.event.location || !this.event.location.length) return;
-    
+
     const lat = this.event.location[1];
     const lng = this.event.location[0];
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-    
-    Browser.open({url});
+
+    Browser.open({ url });
   }
 
   shareEvent() {
@@ -117,13 +114,16 @@ export class EventDetailsPage implements OnInit {
   }
 
   toggleEventStatus() {
-    if (!this.event) return;
     this.eventStatus = !this.eventStatus;
     if (this.eventStatus) {
-      this.storedEvents.push(this.event);
-    } else {
-      this.storedEvents = this.storedEvents.filter((event) => event.id !== this.eventId);
+      this.eventIds.set(this.eventId, "");
+      this.storageService.set("events", this.eventIds);
     }
+    else {
+      this.eventIds.delete(this.eventId);
+      this.storageService.set("events", this.eventIds);
+    }
+    console.log(this.eventIds);
   }
 
   getDistance(): string {
