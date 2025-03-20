@@ -13,7 +13,7 @@ import { StorageService } from '../services/storage.service';
 import { LocationService } from '../services/location/location.service';
 import { Browser } from '@capacitor/browser';
 import { FormsModule } from '@angular/forms';
-import { Event } from '../services/predict-hq/interfaces';
+// import { Event } from '../services/predict-hq/interfaces';
 
 @Component({
   selector: 'app-details',
@@ -42,9 +42,7 @@ export class EventDetailsPage implements OnInit {
   public homepage: string = "";
   public status: string = "";
   public eventId: string = "";
-  public eventIds : Map<String, String> = new Map<String, String>();
   public eventStatus: boolean = false;
-  public storedEvents: Event[] = [];
 
   constructor() { }
 
@@ -56,17 +54,12 @@ export class EventDetailsPage implements OnInit {
         this.eventId = id;
         this.loadEventDetails(id);
       }
-      this.storageService.get("events").then((events) => {
-        if (this.eventIds.has(this.eventId)) {
-          this.eventStatus = true;
-        }
-      }).catch((err) => {
-        console.error(err);
-      });
     });
   }
 
   loadEventDetails(id: string) {
+    this.eventStatus = (localStorage.getItem("events") || "").includes(id);
+
     this.predictHqService.getEventById(id).subscribe((res) => {
       if (res && res.results && res.results.length > 0) {
         this.event = res.results[0];
@@ -114,16 +107,20 @@ export class EventDetailsPage implements OnInit {
   }
 
   toggleEventStatus() {
-    this.eventStatus = !this.eventStatus;
+    this.saveStatus();
+  }
+
+  saveStatus() {
+    let eventString: string = localStorage.getItem("events") || "";
+
     if (this.eventStatus) {
-      this.eventIds.set(this.eventId, "");
-      this.storageService.set("events", this.eventIds);
+      eventString += this.eventId + ",";
+    } else {
+      eventString = eventString.replace(this.eventId + ",", "");
     }
-    else {
-      this.eventIds.delete(this.eventId);
-      this.storageService.set("events", this.eventIds);
-    }
-    console.log(this.eventIds);
+    localStorage.setItem("events", eventString);
+
+    console.log(localStorage.getItem("events"));
   }
 
   getDistance(): string {
