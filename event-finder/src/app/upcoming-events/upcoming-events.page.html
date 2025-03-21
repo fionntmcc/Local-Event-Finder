@@ -17,7 +17,7 @@
 
   <ion-list>
 
-    @for (event of upcomingEvents; track event.id) {
+    @for (event of upcomingEvents; track event.title) {
     <ion-item class="event-list-item">
       <ion-avatar class="event-poster" slot="start">
         <img [src]="event.imageUrl" alt="poster">

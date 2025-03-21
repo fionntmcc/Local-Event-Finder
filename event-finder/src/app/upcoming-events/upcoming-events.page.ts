@@ -18,6 +18,7 @@ import {
   IonAvatar,
 } from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
+import { PredictHqService } from '../services/predict-hq/predict-hq.service';
 
 @Component({
   selector: 'app-upcoming-events',
@@ -44,30 +45,24 @@ import { ExploreContainerComponent } from '../explore-container/explore-containe
 })
 export class UpcomingEventsPage implements OnInit {
 
+  predictHqService = new PredictHqService();
+
   constructor() { }
 
   ngOnInit(): void {
-      this.upcomingEvents = [
-        {
-          id: '1',
-          title: 'Event 1',
-          date: '2022-01-01',
-          location: 'Location 1',
-          imageUrl: 'test',
-          rating: 4.5
-        },
-        {
-          id: '2',
-          title: 'Event 2',
-          date: '2022-02-02',
-          location: 'Location 2',
-          imageUrl: 'test',
-          rating: 3.5
-        },
-      ];
+    this.eventIds = (localStorage.getItem('events') || "").split(",").filter((id: string) => id !== "");
+    console.log(this.eventIds);
+
+    this.eventIds.forEach((id: string) => {
+      this.predictHqService.getEventById(id).subscribe((event: any) => {
+        this.upcomingEvents.push(event.results[0]);
+        console.log(this.upcomingEvents);
+      });
+    });
   }
 
   public upcomingEvents: any[] = [];
+  public eventIds: string[] = [];
 
 
 }
