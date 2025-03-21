@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   IonList,
   IonHeader,
@@ -42,9 +42,30 @@ import { ExploreContainerComponent } from '../explore-container/explore-containe
     IonAvatar,
     ExploreContainerComponent],
 })
-export class UpcomingEventsPage {
+export class UpcomingEventsPage implements OnInit {
 
   constructor() { }
+
+  ngOnInit(): void {
+      this.upcomingEvents = [
+        {
+          id: '1',
+          title: 'Event 1',
+          date: '2022-01-01',
+          location: 'Location 1',
+          imageUrl: 'test',
+          rating: 4.5
+        },
+        {
+          id: '2',
+          title: 'Event 2',
+          date: '2022-02-02',
+          location: 'Location 2',
+          imageUrl: 'test',
+          rating: 3.5
+        },
+      ];
+  }
 
   public upcomingEvents: any[] = [];
 
