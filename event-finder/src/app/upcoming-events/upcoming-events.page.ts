@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import {
   IonList,
   IonHeader,
@@ -16,6 +18,7 @@ import {
   IonBadge,
   IonLabel,
   IonAvatar,
+  IonIcon,
 } from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { PredictHqService } from '../services/predict-hq/predict-hq.service';
@@ -25,6 +28,8 @@ import { PredictHqService } from '../services/predict-hq/predict-hq.service';
   templateUrl: 'upcoming-events.page.html',
   styleUrls: ['upcoming-events.page.scss'],
   imports: [
+    CommonModule,
+    RouterLink,
     IonList,
     IonHeader,
     IonToolbar,
@@ -41,6 +46,7 @@ import { PredictHqService } from '../services/predict-hq/predict-hq.service';
     IonBadge,
     IonLabel,
     IonAvatar,
+    IonIcon,
     ExploreContainerComponent],
 })
 export class UpcomingEventsPage implements OnInit {
@@ -63,6 +69,5 @@ export class UpcomingEventsPage implements OnInit {
 
   public upcomingEvents: any[] = [];
   public eventIds: string[] = [];
-
 
 }

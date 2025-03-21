@@ -1,5 +1,5 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
+  <ion-toolbar color="primary">
     <ion-title>
       Upcoming Events
     </ion-title>
@@ -7,35 +7,66 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Upcoming Events</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <app-explore-container name="Upcoming Events page"></app-explore-container>
-
-  <ion-list>
-
-    @for (event of upcomingEvents; track event.title) {
-    <ion-item class="event-list-item">
-      <ion-avatar class="event-poster" slot="start">
-        <img [src]="event.imageUrl" alt="poster">
-      </ion-avatar>
-
-      <ion-label class="ion-text-wrap">
-        <h3> {{ event.title }} </h3>
-        <p>Date: {{ event.date }}</p>
-      </ion-label>
-
-      @if (event.rating) {
-      <ion-badge slot="end">Rating: {{ event.rating }}</ion-badge>
-      }
-    </ion-item>
-    } @empty {
-    <ion-item lines="none">
-      <ion-label>No past events found</ion-label>
-    </ion-item>
-    } 
-  </ion-list>
+  <div class="events-container">
+    <ng-container *ngIf="upcomingEvents.length > 0; else noEvents">
+      <ion-list lines="none">
+        <ion-item *ngFor="let event of upcomingEvents" class="event-item">
+          <ion-card class="event-card">
+            <div class="event-image-container" [ngStyle]="{'background-image': 'url(' + (event.image || 'assets/event-placeholder.jpg') + ')'}">
+              <div class="event-date-badge">
+                <div class="date-month">{{ event.start.slice(5,7) | date:'MMM' }}</div>
+                <div class="date-day">{{ event.start.slice(8,10) }}</div>
+              </div>
+            </div>
+            <ion-card-header>
+              <div class="category-container">
+                <ion-badge color="primary" *ngIf="event.category">{{ event.category }}</ion-badge>
+                <ion-badge color="tertiary" *ngIf="event.labels?.length">{{ event.labels[0] }}</ion-badge>
+              </div>
+              <ion-card-title class="event-title">{{ event.title }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="event-details">
+                <div class="event-detail">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <span>{{ event.start | date:'E, MMM d, y • h:mm a' }}</span>
+                </div>
+                <div class="event-detail" *ngIf="event.location">
+                  <ion-icon name="location-outline"></ion-icon>
+                  <span>{{ event.location }}</span>
+                </div>
+                <div class="event-detail" *ngIf="event.description">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                  <span class="description">{{ event.description | slice:0:100 }}{{ event.description.length > 100 ? '...' : '' }}</span>
+                </div>
+              </div>
+              <div class="event-actions">
+                <ion-button fill="clear" size="small">
+                  <ion-icon slot="start" name="share-social-outline"></ion-icon>
+                  Share
+                </ion-button>
+                <ion-button fill="clear" size="small">
+                  <ion-icon slot="start" name="trash-outline"></ion-icon>
+                  Remove
+                </ion-button>
+                <ion-button fill="clear" size="small">
+                  <ion-icon slot="start" name="open-outline"></ion-icon>
+                  View
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-item>
+      </ion-list>
+    </ng-container>
+    
+    <ng-template #noEvents>
+      <div class="empty-state">
+        <ion-icon name="calendar"></ion-icon>
+        <h2>No upcoming events</h2>
+        <p>Your saved events will appear here</p>
+        <ion-button routerLink="/tabs/tab1">Discover Events</ion-button>
+      </div>
+    </ng-template>
+  </div>
 </ion-content>
