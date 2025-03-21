@@ -9,7 +9,6 @@ import {
   IonInput, IonRadio, IonBadge, IonSpinner, IonList, IonImg
 } from '@ionic/angular/standalone';
 import { PredictHqService } from '../services/predict-hq/predict-hq.service';
-import { StorageService } from '../services/storage.service';
 import { LocationService } from '../services/location/location.service';
 import { Browser } from '@capacitor/browser';
 import { FormsModule } from '@angular/forms';
@@ -32,7 +31,6 @@ import { FormsModule } from '@angular/forms';
 export class EventDetailsPage implements OnInit {
   // inject services
   private predictHqService = inject(PredictHqService);
-  private storageService = inject(StorageService);
   private locationService = inject(LocationService);
   private route = inject(ActivatedRoute);
 

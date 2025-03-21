@@ -14,4 +14,28 @@
   </ion-header>
 
   <app-explore-container name="Upcoming Events page"></app-explore-container>
+
+  <ion-list>
+
+    @for (event of upcomingEvents; track event.id) {
+    <ion-item class="event-list-item">
+      <ion-avatar class="event-poster" slot="start">
+        <img [src]="event.imageUrl" alt="poster">
+      </ion-avatar>
+
+      <ion-label class="ion-text-wrap">
+        <h3> {{ event.title }} </h3>
+        <p>Date: {{ event.date }}</p>
+      </ion-label>
+
+      @if (event.rating) {
+      <ion-badge slot="end">Rating: {{ event.rating }}</ion-badge>
+      }
+    </ion-item>
+    } @empty {
+    <ion-item lines="none">
+      <ion-label>No past events found</ion-label>
+    </ion-item>
+    } 
+  </ion-list>
 </ion-content>
