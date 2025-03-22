@@ -62,12 +62,14 @@ export class UpcomingEventsPage implements OnInit {
 
   ngOnInit(): void {
     this.eventIds = (localStorage.getItem('events') || "").split(",").filter((id: string) => id !== "");
+    console.log("Event ids:");
     console.log(this.eventIds);
+    console.log("Upcoming events:");
+    console.log(this.upcomingEvents);
 
     this.eventIds.forEach((id: string) => {
       this.predictHqService.getEventById(id).subscribe((event: any) => {
         this.upcomingEvents.push(event.results[0]);
-        console.log(this.upcomingEvents);
       });
     });
   }
