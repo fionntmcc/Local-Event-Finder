@@ -1,42 +1,81 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
+  <ion-toolbar color="primary">
     <ion-title>
       Past Events
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-
-
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Past Events</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="events-container">
 
-  <ion-list>
-
-    @for (event of pastEvents; track event.id) {
-    <ion-item class="event-list-item">
-      <ion-avatar class="event-poster" slot="start">
-        <img [src]="event.imageUrl" alt="poster">
-      </ion-avatar>
-
-      <ion-label class="ion-text-wrap">
-        <h3> {{ event.title }} </h3>
-        <p>Date: {{ event.date }}</p>
-      </ion-label>
-
-      @if (event.rating) {
-      <ion-badge slot="end">Rating: {{ event.rating }}</ion-badge>
-      }
-    </ion-item>
-    } @empty {
-    <ion-item lines="none">
-      <ion-label>No past events found</ion-label>
-    </ion-item>
+    @if (upcomingEvents.length == 0) {
+    @if (eventIds.length == 0) {
+    <div class="empty-state">
+      <ion-icon name="calendar"></ion-icon>
+      <h2>No past events</h2>
+      <p>Your past events will appear here</p>
+      <ion-button routerLink="/tabs/home">Discover Events</ion-button>
+    </div>
+    } @else {
+    <div class="empty-state">
+      <ion-spinner class="ion-text-center" name="crescent"></ion-spinner>
+    </div>
     }
-
-  </ion-list>
+    } @else {
+    <ng-container>
+      <ion-list lines="none">
+        <ion-item *ngFor="let event of upcomingEvents" class="event-item">
+          <ion-card class="event-card">
+            <div class="event-image-container"
+              [ngStyle]="{'background-image': 'url(' + (event.image || 'assets/event-placeholder.jpg') + ')'}">
+              <div class="event-date-badge">
+                <div class="date-month">{{ event.start.slice(5,7) | date:'MMM' }}</div>
+                <div class="date-day">{{ event.start.slice(8,10) }}</div>
+              </div>
+            </div>
+            <ion-card-header>
+              <div class="category-container">
+                <ion-badge color="primary" *ngIf="event.category">{{ event.category }}</ion-badge>
+                <ion-badge color="tertiary" *ngIf="event.labels?.length">{{ event.labels[0] }}</ion-badge>
+              </div>
+              <ion-card-title class="event-title">{{ event.title }}</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="event-details">
+                <div class="event-detail">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <span>{{ event.start | date:'E, MMM d, y • h:mm a' }}</span>
+                </div>
+                <div class="event-detail" *ngIf="event.location">
+                  <ion-icon name="location-outline"></ion-icon>
+                  <span>{{ event.location }}</span>
+                </div>
+                <div class="event-detail" *ngIf="event.description">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                  <span class="description">{{ event.description | slice:0:100 }}{{ event.description.length > 100 ?
+                    '...' : '' }}</span>
+                </div>
+              </div>
+              <div class="event-actions">
+                <ion-button (click)="shareEvent(event)" fill="clear" size="small">
+                  <ion-icon slot="start" name="share-social-outline"></ion-icon>
+                  Share
+                </ion-button>
+                <ion-button (click)="removeEvent(event.id)" fill="clear" size="small">
+                  <ion-icon slot="start" name="trash-outline"></ion-icon>
+                  Remove
+                </ion-button>
+                <ion-button [routerLink]="['/event', event.id]" fill="clear" size="small">
+                  <ion-icon slot="start" name="open-outline"></ion-icon>
+                  View
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-item>
+      </ion-list>
+    </ng-container>
+    }
+  </div>
 </ion-content>

@@ -41,6 +41,7 @@ export class ProfilePage implements OnInit {
   notificationsEnabled: boolean = true;
   darkModeEnabled: boolean = false;
   locationEnabled: boolean = true;
+  
 
   constructor() {}
 
