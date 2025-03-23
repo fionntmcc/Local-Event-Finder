@@ -20,7 +20,6 @@ import { LocationService } from '../services/location/location.service';
 import { StorageService } from '../services/storage.service';
 import { Router } from '@angular/router';
 import { EventCategory } from '../services/predict-hq/event-category';
-import { act } from 'react';
 
 declare global {
   interface Window {

@@ -7,8 +7,6 @@ import {
   IonItem, 
   IonLabel, 
   IonContent, 
-  IonAvatar, 
-  IonNote,
   IonToggle,
  } from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
@@ -31,8 +29,6 @@ import { FormsModule } from '@angular/forms';
     IonList, 
     IonItem, 
     IonLabel, 
-    IonAvatar, 
-    IonNote,
     IonToggle,
   ],
 })

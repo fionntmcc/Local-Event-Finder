@@ -16,11 +16,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('../upcoming-events/upcoming-events.page').then((m) => m.UpcomingEventsPage),
       },
+      /*       
       {
         path: 'past-events',
         loadComponent: () =>
           import('../past-events/past-events.page').then((m) => m.PastEventsPage),
-      },
+      }, 
+      */
       {
         path: 'settings',
         loadComponent: () =>

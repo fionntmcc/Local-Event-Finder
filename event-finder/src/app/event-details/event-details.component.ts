@@ -2,16 +2,33 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLinkWithHref, ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import {
-  IonContent, IonHeader, IonTitle, IonToolbar, IonIcon, IonCard, IonCardHeader,
-  IonCardTitle, IonCardSubtitle, IonCardContent, IonText, IonLabel, IonButtons,
-  IonButton, IonBackButton, IonItem, IonNav, IonAvatar, IonToggle, IonPopover,
-  IonInput, IonRadio, IonBadge, IonSpinner, IonList, IonImg
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonIcon,
+  IonText,
+  IonLabel,
+  IonButtons,
+  IonButton,
+  IonBackButton,
+  IonItem,
+  IonNav,
+  IonAvatar,
+  IonToggle,
+  IonPopover,
+  IonInput,
+  IonRadio,
+  IonBadge,
+  IonSpinner,
+  IonList,
+  IonImg
 } from '@ionic/angular/standalone';
 import { PredictHqService } from '../services/predict-hq/predict-hq.service';
 import { LocationService } from '../services/location/location.service';
 import { Browser } from '@capacitor/browser';
-import { FormsModule } from '@angular/forms';
 import { LocalNotifications } from '@capacitor/local-notifications';
 // import { Event } from '../services/predict-hq/interfaces';
 
@@ -22,11 +39,31 @@ import { LocalNotifications } from '@capacitor/local-notifications';
   standalone: true,
   imports: [
     CommonModule,
-    IonContent, IonHeader, IonTitle, IonToolbar, IonIcon, IonCard, IonCardHeader,
-    IonCardTitle, IonCardSubtitle, IonCardContent, IonText, IonLabel, IonButtons,
-    IonButton, IonBackButton, IonItem, DatePipe, CurrencyPipe, IonNav, IonAvatar,
-    RouterLinkWithHref, IonToggle, IonPopover, IonInput, IonRadio, FormsModule,
-    IonBadge, IonSpinner, IonList, IonImg
+    FormsModule,  // Move FormsModule earlier in the array for clarity
+    DatePipe,
+    CurrencyPipe,
+    RouterLinkWithHref,
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    IonIcon,
+    IonText,
+    IonLabel,
+    IonButtons,
+    IonButton,
+    IonBackButton,
+    IonItem,
+    IonNav,
+    IonAvatar,
+    IonToggle,
+    IonPopover,
+    IonInput,
+    IonRadio,
+    IonBadge,
+    IonSpinner,
+    IonList,
+    IonImg
   ]
 })
 export class EventDetailsPage implements OnInit {
@@ -44,7 +81,7 @@ export class EventDetailsPage implements OnInit {
   public eventId: string = "";
   public eventStatus: boolean = false;
 
-  constructor() { 
+  constructor() {
     this.checkNotificationPermissions();
   }
 
@@ -64,6 +101,7 @@ export class EventDetailsPage implements OnInit {
 
     this.predictHqService.getEventById(id).subscribe((res) => {
       if (res && res.results && res.results.length > 0) {
+        res.results[0].description.replace('Sourced from predicthq.com', '');
         this.event = res.results[0];
 
         // Set homepage URL if available
@@ -77,7 +115,7 @@ export class EventDetailsPage implements OnInit {
   async checkNotificationPermissions() {
     const { display } = await LocalNotifications.checkPermissions();
     this.notificationsEnabled = display === 'granted';
-    
+
     if (!this.notificationsEnabled) {
       const { display } = await LocalNotifications.requestPermissions();
       this.notificationsEnabled = display === 'granted';
@@ -86,11 +124,11 @@ export class EventDetailsPage implements OnInit {
 
   async scheduleNotification(event: any) {
     if (!this.notificationsEnabled || !event) return;
-    
+
     // Parse the event start date
     const eventDate = new Date(event.start);
     const today = new Date();
-    
+
     // Only schedule if the event is in the future
     if (eventDate > today) {
       // Set notification for 9:00 AM on the event day
@@ -188,15 +226,15 @@ export class EventDetailsPage implements OnInit {
       eventString = eventString.replace(this.eventId + ",", "");
 
       // Cancel notification when event is removed
-    if (this.notificationsEnabled) {
-      try {
-        const notificationId = parseInt(this.eventId.replace(/\D/g, '').substring(0, 8) || '1');
-        await LocalNotifications.cancel({ notifications: [{ id: notificationId }] });
-        console.log(`Cancelled notification for event ${this.eventId}`);
-      } catch (error) {
-        console.error('Error cancelling notification:', error);
+      if (this.notificationsEnabled) {
+        try {
+          const notificationId = parseInt(this.eventId.replace(/\D/g, '').substring(0, 8) || '1');
+          await LocalNotifications.cancel({ notifications: [{ id: notificationId }] });
+          console.log(`Cancelled notification for event ${this.eventId}`);
+        } catch (error) {
+          console.error('Error cancelling notification:', error);
+        }
       }
-    }
     }
     localStorage.setItem("events", eventString);
 
