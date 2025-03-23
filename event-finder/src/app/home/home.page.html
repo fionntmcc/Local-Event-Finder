@@ -42,7 +42,6 @@
           </ion-item>
         </ion-list>
         <div class="popover-footer">
-          <ion-button fill="outline" size="small" (click)="applyFilters()">Clear All</ion-button>
           <ion-button (click)="applyFilters()">Apply</ion-button>
         </div>
       </ion-content>
@@ -81,7 +80,8 @@
         <p>{{ formatDate(event.start_local) }}</p>
         <p *ngIf="event.location && event.location.length >= 2">{{ getDistance(event.location[1], event.location[0]) }} away</p>
         <p *ngIf="event.predicted_event_spend > 0">Est. cost: {{ formatCurrency(event.predicted_event_spend) }}</p>
-        <p *ngIf="event.description">{{ truncateDescription(event.description, 120) }}</p>
+        <p *ngIf="event.description">{{ event.description.length == 26 ? "No description" : event.description.replace('Sourced from predicthq.com - ', '') }}{{ event.description.length > 100 ?
+          '...' : '' }}</p>
         <ion-chip *ngFor="let label of getLimitedLabels(event.labels, 3)" class="small-chip">
           {{ label }}
         </ion-chip>

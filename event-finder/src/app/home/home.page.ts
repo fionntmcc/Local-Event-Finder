@@ -346,12 +346,6 @@ export class HomePage implements OnInit {
     }).format(amount);
   }
 
-  // Truncate description
-  truncateDescription(text: string, maxLength: number): string {
-    if (!text) return '';
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-  }
-
   // Limit the number of labels to display
   getLimitedLabels(labels: string[], limit: number): string[] {
     if (!labels) return [];
@@ -404,7 +398,7 @@ export class HomePage implements OnInit {
             <p style="margin: 4px 0; font-size: 14px;"><strong>${this.formatDate(event.start_local)}</strong></p>
             <p style="margin: 4px 0; font-size: 14px; color: #666;"><ion-icon name="location"></ionicon> ${this.getDistance(event.location[1], event.location[0])} away</p>
             <p style="margin: 6px 0; font-size: 13px; line-height: 1.3; max-height: 60px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-              ${this.truncateDescription(event.description.replace('Sourced from predicthq.com - ', ''), 100) || ''}
+              ${ event.description.length == 26 ? "No description" : event.description.replace('Sourced from predicthq.com - ', '')}
             </p>
             <button id="view-details-${event.id}" style="background-color: #3880ff; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 8px;">
               View Details

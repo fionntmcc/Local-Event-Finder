@@ -4,7 +4,6 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ApiResult } from './interfaces';
-import { EventCategory } from './event-category';
 
 const API_KEY = environment.event_finder_api_key;
 const API_URL = environment.event_finder_api_url;

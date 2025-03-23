@@ -47,13 +47,9 @@
                   <ion-icon name="calendar-outline"></ion-icon>
                   <span>{{ event.start | date:'E, MMM d, y • h:mm a' }}</span>
                 </div>
-                <div class="event-detail" *ngIf="event.location">
-                  <ion-icon name="location-outline"></ion-icon>
-                  <span>{{ event.location }}</span>
-                </div>
                 <div class="event-detail" *ngIf="event.description">
                   <ion-icon name="information-circle-outline"></ion-icon>
-                  <span class="description">{{ event.description | slice:0:100 }}{{ event.description.length > 100 ?
+                  <span class="description">{{ event.description.length == 26 ? "No description" : event.description.replace('Sourced from predicthq.com - ', '') }}{{ event.description.length > 100 ?
                     '...' : '' }}</span>
                 </div>
               </div>
