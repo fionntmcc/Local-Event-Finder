@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Evie
+      Settings
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -17,12 +17,12 @@
   <ion-list>
     <ion-item>
       <ion-label>Notifications</ion-label>
-      <ion-toggle [(ngModel)]="notificationsEnabled" (ionChange)="toggleNotifications()"></ion-toggle>
+      <ion-toggle slot="end" [(ngModel)]="notificationsEnabled" (ionChange)="toggleNotifications()"></ion-toggle>
     </ion-item>
 
     <ion-item>
       <ion-label>Dark Mode</ion-label>
-      <ion-toggle [(ngModel)]="darkModeEnabled" (ionChange)="toggleDarkMode()"></ion-toggle>
+      <ion-toggle slot="end" [(ngModel)]="darkModeEnabled" (ionChange)="toggleDarkMode()"></ion-toggle>
     </ion-item>
 
     <!-- 
