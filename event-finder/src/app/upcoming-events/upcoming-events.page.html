@@ -27,15 +27,17 @@
       <ion-list lines="none">
         <ion-item *ngFor="let event of upcomingEvents" class="event-item">
           <ion-card class="event-card">
+            <!-- 
             <div class="event-image-container"
               [ngStyle]="{'background-image': 'url(' + (event.image || 'assets/event-placeholder.jpg') + ')'}">
-              <div class="event-date-badge">
-                <div class="date-month">{{ event.start.slice(5,7) | date:'MMM' }}</div>
-                <div class="date-day">{{ event.start.slice(8,10) }}</div>
-              </div>
-            </div>
+            </div> 
+            -->
             <ion-card-header>
               <div class="category-container">
+                <div class="event-date-badge">
+                  <div class="date-month">{{ event.start.slice(5,7) | date:'MMM' }}</div>
+                  <div class="date-day">{{ event.start.slice(8,10) }}</div>
+                </div>
                 <ion-badge color="primary" *ngIf="event.category">{{ event.category }}</ion-badge>
                 <ion-badge color="tertiary" *ngIf="event.labels?.length">{{ event.labels[0] }}</ion-badge>
               </div>
