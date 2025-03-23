@@ -1,5 +1,5 @@
 // All necessary imports
-import { Component, Input, OnInit, WritableSignal, inject, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLinkWithHref, ActivatedRoute } from '@angular/router';
 import {
@@ -12,6 +12,7 @@ import { PredictHqService } from '../services/predict-hq/predict-hq.service';
 import { LocationService } from '../services/location/location.service';
 import { Browser } from '@capacitor/browser';
 import { FormsModule } from '@angular/forms';
+import { LocalNotifications } from '@capacitor/local-notifications';
 // import { Event } from '../services/predict-hq/interfaces';
 
 @Component({
@@ -35,6 +36,7 @@ export class EventDetailsPage implements OnInit {
   private route = inject(ActivatedRoute);
 
   // Necessary inits
+  public notificationsEnabled = false;
   public event: any = null;
   public isPopupActive: boolean = false;
   public homepage: string = "";
@@ -42,7 +44,9 @@ export class EventDetailsPage implements OnInit {
   public eventId: string = "";
   public eventStatus: boolean = false;
 
-  constructor() { }
+  constructor() { 
+    this.checkNotificationPermissions();
+  }
 
   ngOnInit() {
     // Get event ID from route parameters
@@ -68,6 +72,68 @@ export class EventDetailsPage implements OnInit {
         }
       }
     });
+  }
+
+  async checkNotificationPermissions() {
+    const { display } = await LocalNotifications.checkPermissions();
+    this.notificationsEnabled = display === 'granted';
+    
+    if (!this.notificationsEnabled) {
+      const { display } = await LocalNotifications.requestPermissions();
+      this.notificationsEnabled = display === 'granted';
+    }
+  }
+
+  async scheduleNotification(event: any) {
+    if (!this.notificationsEnabled || !event) return;
+    
+    // Parse the event start date
+    const eventDate = new Date(event.start);
+    const today = new Date();
+    
+    // Only schedule if the event is in the future
+    if (eventDate > today) {
+      // Set notification for 9:00 AM on the event day
+      const notificationTime = new Date(eventDate);
+      notificationTime.setHours(9, 0, 0, 0);
+
+      try {
+        await LocalNotifications.schedule({
+          notifications: [{
+            id: parseInt(event.id.replace(/\D/g, '').substring(0, 8) || '1'),
+            title: 'Event Today: ' + event.title,
+            body: `Don't forget your event "${event.title}" is today!`,
+            schedule: { at: notificationTime },
+            actionTypeId: '',
+            extra: { eventId: event.id }
+          }]
+        });
+        console.log(`Notification scheduled for event ${event.id} on ${notificationTime}`);
+      } catch (error) {
+        console.error('Error scheduling notification:', error);
+      }
+
+      // Test nofification for demo purposes
+      // Set notification for 9:00 AM on the event day
+      const notificationTimeTest = new Date();
+      notificationTime.setMinutes(notificationTime.getMinutes() + 1);
+
+      try {
+        await LocalNotifications.schedule({
+          notifications: [{
+            id: parseInt(event.id.replace(/\D/g, '').substring(0, 8) || '1'),
+            title: 'Event Today: ' + event.title,
+            body: `Don't forget your event "${event.title}" is today!`,
+            schedule: { at: notificationTime },
+            actionTypeId: '',
+            extra: { eventId: event.id }
+          }]
+        });
+        console.log(`Notification scheduled for event ${event.id} on ${notificationTime}`);
+      } catch (error) {
+        console.error('Error scheduling notification:', error);
+      }
+    }
   }
 
   async openEventWebsite() {
@@ -108,13 +174,29 @@ export class EventDetailsPage implements OnInit {
     this.saveStatus();
   }
 
-  saveStatus() {
+  async saveStatus() {
     let eventString: string = localStorage.getItem("events") || "";
 
     if (this.eventStatus) {
       eventString += this.eventId + ",";
+
+      if (localStorage.getItem("notifications") === "true") {
+        this.scheduleNotification(this.event);
+      }
+
     } else {
       eventString = eventString.replace(this.eventId + ",", "");
+
+      // Cancel notification when event is removed
+    if (this.notificationsEnabled) {
+      try {
+        const notificationId = parseInt(this.eventId.replace(/\D/g, '').substring(0, 8) || '1');
+        await LocalNotifications.cancel({ notifications: [{ id: notificationId }] });
+        console.log(`Cancelled notification for event ${this.eventId}`);
+      } catch (error) {
+        console.error('Error cancelling notification:', error);
+      }
+    }
     }
     localStorage.setItem("events", eventString);
 

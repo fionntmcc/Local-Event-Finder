@@ -57,22 +57,10 @@ export class UpcomingEventsPage implements OnInit {
   predictHqService = new PredictHqService();
   notificationsEnabled = false;
 
-  constructor() { 
-    this.checkNotificationPermissions();
-  }
+  constructor() {}
 
   public upcomingEvents: any[] = [];
   public eventIds: string[] = [];
-
-  async checkNotificationPermissions() {
-    const { display } = await LocalNotifications.checkPermissions();
-    this.notificationsEnabled = display === 'granted';
-    
-    if (!this.notificationsEnabled) {
-      const { display } = await LocalNotifications.requestPermissions();
-      this.notificationsEnabled = display === 'granted';
-    }
-  }
 
   ngOnInit(): void {
     this.eventIds = (localStorage.getItem('events') || "").split(",").filter((id: string) => id !== "");

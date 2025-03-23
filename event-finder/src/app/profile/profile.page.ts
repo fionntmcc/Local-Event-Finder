@@ -54,6 +54,7 @@ export class ProfilePage implements OnInit {
   // Toggle handlers
   toggleNotifications() {
     console.log('Notifications toggled:', this.notificationsEnabled);
+    localStorage.setItem('notifications', this.notificationsEnabled.toString());
     // Add your notification toggle logic here
   }
 
@@ -64,11 +65,13 @@ export class ProfilePage implements OnInit {
     localStorage.setItem('darkMode', this.darkModeEnabled.toString());
   }
 
+  /* 
   toggleLocation() {
     console.log('Location services toggled:', this.locationEnabled);
     // Add your \location services toggle logic here
   }
-  
+  */
+
   // Apply dark mode to the entire application
   private applyDarkMode(enable: boolean) {
     const body = document.querySelector('body');

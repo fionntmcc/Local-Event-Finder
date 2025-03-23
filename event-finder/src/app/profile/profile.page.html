@@ -13,39 +13,6 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-list>
-    <ion-item lines="none">
-      <ion-avatar slot="start">
-        <!-- <img src="assets/profile-picture.jpg" /> -->
-      </ion-avatar>
-    </ion-item>
-    <ion-item>
-      <ion-label>Email</ion-label>
-      <ion-note slot="end">evie123</ion-note>
-    </ion-item>
-    <ion-item>
-      <ion-label>Password</ion-label>
-      <ion-note slot="end">***************</ion-note>
-    </ion-item>
-    <ion-item>
-      <ion-label>Phone</ion-label>
-      <ion-note slot="end">+ (353) 87 111 1111</ion-note>
-    </ion-item>
-    <ion-item>
-      <ion-label>Location</ion-label>
-      <ion-note slot="end">Galway, Ireland</ion-note>
-    </ion-item>
-    <!-- 
-    <ion-item>
-      <ion-label>Currency</ion-label>
-      <ion-note slot="end">EUR (€)</ion-note>
-    </ion-item>
-      -->
-    <ion-item lines="none">
-      <ion-label color="danger">Logout</ion-label>
-    </ion-item>
-  </ion-list>
-
   <!-- Settings with toggles -->
   <ion-list>
     <ion-item>
@@ -58,9 +25,11 @@
       <ion-toggle [(ngModel)]="darkModeEnabled" (ionChange)="toggleDarkMode()"></ion-toggle>
     </ion-item>
 
+    <!-- 
     <ion-item>
       <ion-label>Location Services</ion-label>
       <ion-toggle [(ngModel)]="locationEnabled" (ionChange)="toggleLocation()"></ion-toggle>
-    </ion-item>
+    </ion-item> 
+    -->
   </ion-list>
 </ion-content>

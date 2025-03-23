@@ -28,9 +28,6 @@ export class PredictHqService {
         }
 
         console.log("Events: " + eventCategories);
-        eventCategories = Object.keys(EventCategory).filter((item) => {
-            return isNaN(Number(item));
-        });
         
         // Construct category string
         let categoryString = (eventCategories.length > 0 ? `&category=${eventCategories.join(',')}` : '');
