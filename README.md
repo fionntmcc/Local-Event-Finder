@@ -95,6 +95,7 @@ npx cap open android
 ## Usage
 
 - Launch the app on your Android emulator.
+- Drag and drop your location marker to search for events in different locations.
 - Use the search bar to search for events by category, location, or date.
 - Tap on an event marker on the map to view event details.
 - Use the "Get Directions" button to open Google Maps with directions to the event location.
