@@ -1,14 +1,29 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterLinkWithHref } from '@angular/router';
 import {
-  IonList, IonHeader, IonToolbar, IonTitle, IonContent, IonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonButton, IonPopover, InfiniteScrollCustomEvent, IonInfiniteScroll, IonInfiniteScrollContent,
+  IonList, 
+  IonHeader, 
+  IonToolbar, 
+  IonTitle, 
+  IonContent, 
+  IonText, 
+  IonCard, 
+  IonCardHeader, IonCardTitle, 
+  IonCardContent,
+  IonButton, 
+  IonPopover, 
+  InfiniteScrollCustomEvent, 
+  IonInfiniteScroll, 
+  IonInfiniteScrollContent,
   IonChip,
   IonLabel,
   IonListHeader,
   IonItem,
   IonCheckbox,
-  IonIcon, IonSearchbar, IonSpinner,
+  IonIcon, 
+  IonSearchbar, 
+  IonSpinner,
+  IonBadge,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, NgStyle, TitleCasePipe } from '@angular/common';
@@ -62,6 +77,7 @@ declare global {
     RouterLinkWithHref,
     IonListHeader,
     IonItem,
+    IonBadge,
   ],
 })
 
