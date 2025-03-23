@@ -22,9 +22,9 @@ export const routes: Routes = [
           import('../past-events/past-events.page').then((m) => m.PastEventsPage),
       },
       {
-        path: 'profile',
+        path: 'settings',
         loadComponent: () =>
-          import('../profile/profile.page').then((m) => m.ProfilePage),
+          import('../settings/settings.page').then((m) => m.SettingsPage),
       },
       {
         path: '',

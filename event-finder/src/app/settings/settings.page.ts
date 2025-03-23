@@ -16,9 +16,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: 'profile.page.html',
-  styleUrls: ['profile.page.scss'],
+  selector: 'app-settings',
+  templateUrl: 'settings.page.html',
+  styleUrls: ['settings.page.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -36,7 +36,7 @@ import { FormsModule } from '@angular/forms';
     IonToggle,
   ],
 })
-export class ProfilePage implements OnInit {
+export class SettingsPage implements OnInit {
   // Toggle states
   notificationsEnabled: boolean = true;
   darkModeEnabled: boolean = false;
