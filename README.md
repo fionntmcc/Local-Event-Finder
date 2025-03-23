@@ -27,7 +27,7 @@ Local Event Finder is a mobile application that helps users discover local event
 
 ```sh
 git clone https://github.com/your-username/local-event-finder.git
-cd localevent-finder/event-finder
+cd event-finder
 ```
 
 2. Install dependencies:
