@@ -122,6 +122,9 @@ export class HomePage implements OnInit {
   // Add a property to control the help toast
   public showDragHelpToast: boolean = true;
 
+  // Add property to track the current sort method
+  public currentSortMethod: string = 'none'; // Options: 'none', 'alphabetical', 'date', 'category'
+
   constructor() {
     // Initialize the map callback function
     window.initMap = () => {
@@ -170,6 +173,7 @@ export class HomePage implements OnInit {
       return isNaN(parseInt(item));
     });
     this.activeCategories = this.categories.map(() => false);
+    this.currentSortMethod = 'none'; // Reset sort method
 
     // Use the location service to refresh location, then load events
     this.locationService.refreshLocation()
@@ -373,6 +377,12 @@ export class HomePage implements OnInit {
           console.log(res);
           // push event to event array
           this.events.push(...res.results);
+          
+          // Apply sorting if a sort method is active
+          if (this.currentSortMethod !== 'none') {
+            this.sortAndUpdateEvents();
+          }
+          
           console.log(this.events);
           // Add markers to map if map is initialized
           this.addEventMarkersToMap();
@@ -567,5 +577,55 @@ export class HomePage implements OnInit {
   // Add a method to navigate to event details
   navigateToEventDetails(eventId: string) {
     this.router.navigate(['/event', eventId]);
+  }
+
+  // Function to get a user-friendly label for the current sort method
+  getSortMethodLabel(): string {
+    switch (this.currentSortMethod) {
+      case 'alphabetical':
+        return 'Alphabetical';
+      case 'date':
+        return 'Date';
+      case 'category':
+        return 'Category';
+      default:
+        return '';
+    }
+  }
+
+  // Reset sorting to default
+  resetSorting(): void {
+    this.currentSortMethod = 'none';
+    this.sortAndUpdateEvents();
+  }
+
+  // Sort events based on the selected method
+  sortEvents(method: string): void {
+    this.currentSortMethod = method;
+    this.sortAndUpdateEvents();
+  }
+
+  // Apply the current sort method to the events array
+  sortAndUpdateEvents(): void {
+    if (!this.events || this.events.length === 0) return;
+
+    switch (this.currentSortMethod) {
+      case 'alphabetical':
+        this.events.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'date':
+        this.events.sort((a, b) => new Date(a.start_local).getTime() - new Date(b.start_local).getTime());
+        break;
+      case 'category':
+        this.events.sort((a, b) => {
+          const catA = a.labels && a.labels.length > 0 ? a.labels[0] : 'zzz'; // 'zzz' to sort events without category last
+          const catB = b.labels && b.labels.length > 0 ? b.labels[0] : 'zzz';
+          return catA.localeCompare(catB);
+        });
+        break;
+      default:
+        // No sorting (keep the order from the API)
+        break;
+    }
   }
 }
