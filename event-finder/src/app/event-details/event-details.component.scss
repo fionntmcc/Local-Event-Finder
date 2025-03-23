@@ -10,3 +10,15 @@ ion-toggle {
     display: block;
     margin: 3%;
 }
+
+ion-back-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    
+    svg {
+        color: var(--ion-color-primary);
+        stroke-width: 2.5px;
+        height: 20px;
+        width: 20px;
+    }
+}

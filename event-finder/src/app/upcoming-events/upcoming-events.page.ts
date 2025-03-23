@@ -7,21 +7,16 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonText,
   IonCard,
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
   IonButton,
-  IonPopover,
   IonItem,
   IonBadge,
-  IonLabel,
-  IonAvatar,
   IonIcon,
   IonSpinner,
 } from '@ionic/angular/standalone';
-import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { PredictHqService } from '../services/predict-hq/predict-hq.service';
 import { LocalNotifications } from '@capacitor/local-notifications';
 
@@ -37,27 +32,23 @@ import { LocalNotifications } from '@capacitor/local-notifications';
     IonToolbar,
     IonTitle,
     IonContent,
-    IonText,
     IonCard,
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
     IonButton,
-    IonPopover,
     IonItem,
     IonBadge,
-    IonLabel,
-    IonAvatar,
     IonIcon,
     IonSpinner,
-    ExploreContainerComponent],
+  ],
 })
 export class UpcomingEventsPage implements OnInit {
 
   predictHqService = new PredictHqService();
   notificationsEnabled = false;
 
-  constructor() {}
+  constructor() { }
 
   public upcomingEvents: any[] = [];
   public eventIds: string[] = [];
@@ -79,17 +70,17 @@ export class UpcomingEventsPage implements OnInit {
 
   async scheduleNotification(event: any) {
     if (!this.notificationsEnabled || !event) return;
-    
+
     // Parse the event start date
     const eventDate = new Date(event.start);
     const today = new Date();
-    
+
     // Only schedule if the event is in the future
     if (eventDate > today) {
       // Set notification for 9:00 AM on the event day
       const notificationTime = new Date(eventDate);
       notificationTime.setHours(9, 0, 0, 0);
-      
+
       try {
         await LocalNotifications.schedule({
           notifications: [{
@@ -130,7 +121,7 @@ export class UpcomingEventsPage implements OnInit {
     this.eventIds = this.eventIds.filter((id: string) => id !== eventId);
     localStorage.setItem('events', this.eventIds.join(","));
     this.upcomingEvents = this.upcomingEvents.filter((event: any) => event.id !== eventId);
-    
+
     // Cancel notification when event is removed
     if (this.notificationsEnabled) {
       try {
