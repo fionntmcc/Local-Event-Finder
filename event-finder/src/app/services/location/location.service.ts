@@ -123,4 +123,27 @@ export class LocationService {
       console.log('Location initialized from storage:', lat, lng);
     }
   }
+
+  // Add a new method to set manual location
+  public setManualLocation(latitude: number, longitude: number): void {
+    // Update the current position with the manual coordinates
+    const manualPosition: Position = {
+      coords: {
+        latitude: latitude,
+        longitude: longitude,
+        accuracy: 0,
+        altitude: null,
+        altitudeAccuracy: null,
+        heading: null,
+        speed: null
+      },
+      timestamp: new Date().getTime()
+    };
+
+    // Emit the new position to all subscribers
+    this.currentPosition.next(manualPosition);
+    
+    // Update location availability
+    this.locationAvailable.next(true);
+  }
 }

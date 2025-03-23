@@ -114,6 +114,9 @@ export class HomePage implements OnInit {
   // Add pagination tracking variables
   private hasMorePages: boolean = true;
 
+  // Add a flag to track if we're updating via marker drag
+  private updatingViaMarkerDrag: boolean = false;
+
   constructor() {
     // Initialize the map callback function
     window.initMap = () => {
@@ -213,6 +216,7 @@ export class HomePage implements OnInit {
         position: center,
         map: this.map,
         title: 'Your Location',
+        draggable: true, // Make the marker draggable
         icon: {
           path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
           scale: 10,
@@ -223,14 +227,58 @@ export class HomePage implements OnInit {
         }
       });
 
+      // Add drag end event listener to the user marker
+      window.google.maps.event.addListener(this.userMarker, 'dragend', (event: any) => {
+        this.handleMarkerDrag(event);
+      });
+
       // Add event markers when events are loaded
       this.addEventMarkersToMap();
     }
   }
 
-  // Add method to update user marker position
+  // Handle marker drag and update location
+  private handleMarkerDrag(event: any) {
+    const newPosition = {
+      coords: {
+        latitude: event.latLng.lat(),
+        longitude: event.latLng.lng()
+      },
+      timestamp: new Date().getTime()
+    };
+
+    // Set the flag to prevent multiple refreshes
+    this.updatingViaMarkerDrag = true;
+
+    // Update the map center
+    this.map.setCenter({
+      lat: newPosition.coords.latitude,
+      lng: newPosition.coords.longitude
+    });
+
+    // Update the location service with new coordinates
+    this.locationService.setManualLocation(newPosition.coords.latitude, newPosition.coords.longitude);
+
+    // Reset events and reload with new location
+    this.events = [];
+    this.currentPage = 1;
+    this.hasMorePages = true;
+    this.loadEvents();
+
+    // Save the updated location to storage
+    this.storageService.set('userLocation', {
+      latitude: newPosition.coords.latitude,
+      longitude: newPosition.coords.longitude,
+      timestamp: newPosition.timestamp
+    });
+
+    // Reset the flag
+    this.updatingViaMarkerDrag = false;
+  }
+
+  // Modify updateUserMarkerPosition to avoid position updates while dragging
   private updateUserMarkerPosition(position: any) {
-    if (!this.map || !this.mapInitialized) return;
+    if (!this.map || !this.mapInitialized || this.updatingViaMarkerDrag) return;
 
     const newPosition = {
       lat: position.coords.latitude,

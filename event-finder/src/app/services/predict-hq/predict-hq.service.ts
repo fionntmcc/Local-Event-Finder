@@ -32,7 +32,7 @@ export class PredictHqService {
         let categoryString = (eventCategories.length > 0 ? `&category=${eventCategories.join(',')}` : '');
         // remove all spaces from categoryString
 
-        let url = `${API_URL}?within=${maxDistance}km@${latitude},${longitude}&active.lte=${date.toISOString().split('T')[0]}&q=${query}&page=${page}&limit=50${categoryString}`;
+        let url = `${API_URL}?within=${maxDistance}km@${latitude},${longitude}&active.lte=${date.toISOString().split('T')[0]}&q=${query}&page=${page}&limit=40${categoryString}`;
 
         console.log(url);
 
