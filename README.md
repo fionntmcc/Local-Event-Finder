@@ -96,11 +96,15 @@ npx cap open android
 
 - Launch the app on your Android emulator.
 - Drag and drop your location marker to search for events in different locations.
-- Use the search bar to search for events by category, location, or date.
+- Use the search bar to search for events with a query.
+- Filter events by category.
+- Sort events by alphabetical order, category, distance or date.
 - Tap on an event marker on the map to view event details.
 - Use the "Get Directions" button to open Google Maps with directions to the event location.
 - Use the "Set Notification" button to schedule a notification for the event.
 - Use the "Share Event" button to share the event with others.
+- Mark local events to receive notification reminders ahead of time.
+- Toggle dark mode and notifications on the settings page.
 
 ## Contributing
 
