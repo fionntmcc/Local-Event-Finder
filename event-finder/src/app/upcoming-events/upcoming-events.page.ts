@@ -43,7 +43,7 @@ import { LocalNotifications } from '@capacitor/local-notifications';
     IonSpinner,
   ],
 })
-export class UpcomingEventsPage implements OnInit {
+export class UpcomingEventsPage {
 
   predictHqService = new PredictHqService();
   notificationsEnabled = false;
@@ -53,17 +53,24 @@ export class UpcomingEventsPage implements OnInit {
   public upcomingEvents: any[] = [];
   public eventIds: string[] = [];
 
-  ngOnInit(): void {
+  ionViewWillEnter() {
     this.eventIds = (localStorage.getItem('events') || "").split(",").filter((id: string) => id !== "");
     console.log("Event ids:");
     console.log(this.eventIds);
-    console.log("Upcoming events:");
-    console.log(this.upcomingEvents);
+    this.upcomingEvents = [];
 
     this.eventIds.forEach((id: string) => {
       this.predictHqService.getEventById(id).subscribe((event: any) => {
-        this.upcomingEvents.push(event.results[0]);
-        this.scheduleNotification(event.results[0]);
+        if (event?.results?.[0]) {
+          const eventData = event.results[0];
+          // Ensure the event has a start date before adding it
+          if (eventData.start) {
+            this.upcomingEvents.push(eventData);
+            this.scheduleNotification(eventData);
+          } else {
+            console.warn(`Event with ID ${id} has no start date, skipping`);
+          }
+        }
       });
     });
   }

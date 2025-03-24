@@ -50,7 +50,7 @@
     <ion-item *ngIf="event.description">
       <ion-label>
         <h3>About This Event</h3>
-        <p>{{ event.description }}</p>
+        <p>{{ event.description.length == 26 ? "No description" : event.description.replace("Sourced from predicthq.com - ", "") }}</p>
       </ion-label>
     </ion-item>
 

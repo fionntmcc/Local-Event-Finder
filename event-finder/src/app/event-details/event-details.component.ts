@@ -94,6 +94,7 @@ export class EventDetailsPage implements OnInit {
         this.loadEventDetails(id);
       }
     });
+
   }
 
   loadEventDetails(id: string) {

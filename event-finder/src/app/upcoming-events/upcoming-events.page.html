@@ -35,8 +35,8 @@
             <ion-card-header>
               <div class="category-container">
                 <div class="event-date-badge">
-                  <div class="date-month">{{ event.start.slice(5,7) | date:'MMM' }}</div>
-                  <div class="date-day">{{ event.start.slice(8,10) }}</div>
+                  <div class="date-month">{{ event.start ? (event.start.slice(5,7) | date:'MMM') : 'TBD' }}</div>
+                  <div class="date-day">{{ event.start ? event.start.slice(8,10) : '--' }}</div>
                 </div>
                 <ion-badge color="primary" *ngIf="event.category">{{ event.category }}</ion-badge>
                 <ion-badge color="tertiary" *ngIf="event.labels?.length">{{ event.labels[0] }}</ion-badge>
@@ -47,11 +47,12 @@
               <div class="event-details">
                 <div class="event-detail">
                   <ion-icon name="calendar-outline"></ion-icon>
-                  <span>{{ event.start | date:'E, MMM d, y • h:mm a' }}</span>
+                  <span>{{ event.start ? (event.start | date:'E, MMM d, y • h:mm a') : 'Date not available' }}</span>
                 </div>
                 <div class="event-detail" *ngIf="event.description">
                   <ion-icon name="information-circle-outline"></ion-icon>
-                  <span class="description">{{ event.description.length == 26 ? "No description" : event.description.replace('Sourced from predicthq.com - ', '') }}{{ event.description.length > 100 ?
+                  <span class="description">{{ event.description.length == 26 ? "No description" :
+                    event.description.replace('Sourced from predicthq.com - ', '') }}{{ event.description.length > 100 ?
                     '...' : '' }}</span>
                 </div>
               </div>
