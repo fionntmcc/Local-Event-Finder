@@ -18,13 +18,7 @@ export class PredictHqService {
     constructor() { }
 
     // return top movies on given page
-    getEvents(page = 1, latitude = 0, longitude = 0, query = "", eventCategories: string[] = [], maxDistance = 20, date?: Date): Observable<ApiResult> {
-        
-        // if no date, set furthest date for 3 months from now
-        if (!date) {
-            date = new Date();
-            date.setMonth(date.getMonth() + 3);
-        }
+    getEvents(page = 1, latitude = 0, longitude = 0, query = "", eventCategories: string[] = [], maxDistance = 20): Observable<ApiResult> {
 
         console.log("Events: " + eventCategories);
         
@@ -32,7 +26,7 @@ export class PredictHqService {
         let categoryString = (eventCategories.length > 0 ? `&category=${eventCategories.join(',')}` : '');
         // remove all spaces from categoryString
 
-        let url = `${API_URL}?within=${maxDistance}km@${latitude},${longitude}&active.gt=${new Date().toISOString().split('T')[0]}&active.lte=${date.toISOString().split('T')[0]}&q=${query}&page=${page}&limit=40${categoryString}`;
+        let url = `${API_URL}?within=${maxDistance}km@${latitude},${longitude}&q=${query}&page=${page}&limit=40${categoryString}`;
 
         console.log(url);
 
