@@ -77,51 +77,34 @@
         </div>
       </ion-label>
     </ion-item>
-    }
 
-    @if (event.state) {
-      <ion-item>
-        <ion-label>
-          <h3>First Listed</h3>
-          <p>{{ event.first_seen | date: 'mediumDate' }}</p>
-        </ion-label>
-      </ion-item>
-      }
-
-
-    <!-- Pricing Information -->
-    <ion-item *ngIf="event.ticket_price_min || event.ticket_price_max">
+    <ion-item>
       <ion-label>
-        <h3>Pricing</h3>
-        <p *ngIf="event.ticket_price_min && event.ticket_price_max">
-          <span>{{ event.ticket_price_min | currency }} - {{ event.ticket_price_max | currency }}</span>
-        </p>
-        <p *ngIf="event.ticket_price_min && !event.ticket_price_max">
-          <span>From {{ event.ticket_price_min | currency }}</span>
-        </p>
+        <h3>First Listed</h3>
+        <p>{{ event.first_seen | date: 'mediumDate' }}</p>
       </ion-label>
     </ion-item>
-  </ion-list>
+    }
 
-  <!-- Loading State -->
-  <div *ngIf="!event" class="loading-container">
-    <ion-spinner name="circular"></ion-spinner>
-    <p>Loading event details...</p>
-  </div>
+    <!-- Loading State -->
+    <div *ngIf="!event" class="loading-container">
+      <ion-spinner name="circular"></ion-spinner>
+      <p>Loading event details...</p>
+    </div>
 
-  <!-- Action Buttons -->
-  @if (event.url) {
-  <ion-button expand="block" *ngIf="event.url" (click)="openEventWebsite()" color="primary">
-    <ion-icon name="globe-outline" slot="start"></ion-icon>
-    Visit Website
-  </ion-button>
-  }
-  <ion-button expand="block" *ngIf="event.location" (click)="getDirections()" color="secondary">
-    <ion-icon name="navigate-outline" slot="start"></ion-icon>
-    Get Directions
-  </ion-button>
-  <ion-button expand="block" (click)="shareEvent()" color="secondary">
-    <ion-icon name="navigate-outline" slot="start"></ion-icon>
-    Share
-  </ion-button>
+    <!-- Action Buttons -->
+    @if (event.url) {
+    <ion-button expand="block" *ngIf="event.url" (click)="openEventWebsite()" color="primary">
+      <ion-icon name="globe-outline" slot="start"></ion-icon>
+      Visit Website
+    </ion-button>
+    }
+    <ion-button expand="block" *ngIf="event.location" (click)="getDirections()" color="secondary">
+      <ion-icon name="navigate-outline" slot="start"></ion-icon>
+      Get Directions
+    </ion-button>
+    <ion-button expand="block" (click)="shareEvent()" color="secondary">
+      <ion-icon name="navigate-outline" slot="start"></ion-icon>
+      Share
+    </ion-button>
 </ion-content>

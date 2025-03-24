@@ -100,8 +100,7 @@ export class EventDetailsPage implements OnInit {
     this.eventStatus = (localStorage.getItem("events") || "").includes(id);
 
     this.predictHqService.getEventById(id).subscribe((res) => {
-      if (res && res.results && res.results.length > 0) {
-        res.results[0].description.replace('Sourced from predicthq.com', '');
+      if (res && res.results && res.results.length) {
         this.event = res.results[0];
 
         // Set homepage URL if available
@@ -162,7 +161,7 @@ export class EventDetailsPage implements OnInit {
             id: parseInt(event.id.replace(/\D/g, '').substring(0, 8) || '1'),
             title: 'Event Today: ' + event.title,
             body: `Don't forget your event "${event.title}" is today!`,
-            schedule: { at: notificationTime },
+            schedule: { at: notificationTimeTest },
             actionTypeId: '',
             extra: { eventId: event.id }
           }]
