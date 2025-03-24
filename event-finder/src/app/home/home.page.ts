@@ -24,7 +24,6 @@ import {
   IonSearchbar, 
   IonSpinner,
   IonBadge,
-  IonToast,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, NgStyle, TitleCasePipe } from '@angular/common';
@@ -79,7 +78,6 @@ declare global {
     IonListHeader,
     IonItem,
     IonBadge,
-    IonToast,
   ],
 })
 
@@ -236,20 +234,8 @@ export class HomePage implements OnInit {
         }
       });
 
-      // Add drag start event listener to change cursor
-      window.google.maps.event.addListener(this.userMarker, 'dragstart', () => {
-        // Visual feedback that dragging is occurring
-        mapElement.style.cursor = 'grabbing';
-        
-        // Hide the toast when the user starts dragging
-        this.showDragHelpToast = false;
-      });
-
       // Add drag end event listener to the user marker
       window.google.maps.event.addListener(this.userMarker, 'dragend', (event: any) => {
-        // Reset cursor
-        mapElement.style.cursor = 'grab';
-        
         this.handleMarkerDrag(event);
       });
 
@@ -270,12 +256,6 @@ export class HomePage implements OnInit {
 
     // Set the flag to prevent multiple refreshes
     this.updatingViaMarkerDrag = true;
-    
-    // Set loading state to show the user that events are being updated
-    this.isLoading = true;
-    
-    // Clear existing events while loading new ones
-    this.events = [];
 
     // Update the map center
     this.map.setCenter({
@@ -286,25 +266,21 @@ export class HomePage implements OnInit {
     // Update the location service with new coordinates
     this.locationService.setManualLocation(newPosition.coords.latitude, newPosition.coords.longitude);
 
-    // Give the location service time to update before loading events
-    setTimeout(() => {
-      // Reset pagination state
-      this.currentPage = 1;
-      this.hasMorePages = true;
-      
-      // Load events at the new location
-      this.loadEvents();
+    // Reset events and reload with new location
+    this.events = [];
+    this.currentPage = 1;
+    this.hasMorePages = true;
+    this.loadEvents();
 
-      // Save the updated location to storage
-      this.storageService.set('userLocation', {
-        latitude: newPosition.coords.latitude,
-        longitude: newPosition.coords.longitude,
-        timestamp: newPosition.timestamp
-      });
+    // Save the updated location to storage
+    this.storageService.set('userLocation', {
+      latitude: newPosition.coords.latitude,
+      longitude: newPosition.coords.longitude,
+      timestamp: newPosition.timestamp
+    });
 
-      // Reset the flag
-      this.updatingViaMarkerDrag = false;
-    }, 100); // Small delay to ensure location service is updated
+    // Reset the flag
+    this.updatingViaMarkerDrag = false;
   }
 
   // Modify updateUserMarkerPosition to avoid position updates while dragging

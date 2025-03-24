@@ -86,19 +86,9 @@
     <div id="map" class="map-canvas"></div>
   </div>
 
-  <!-- Add toast notification for dragging marker -->
-  <ion-toast
-    [isOpen]="showDragHelpToast"
-    message="Drag the blue arrow to change your location"
-    [duration]="3000"
-    position="middle"
-    [buttons]="[{text: 'OK', role: 'cancel'}]"
-    (didDismiss)="showDragHelpToast = false"
-  ></ion-toast>
-
   <div *ngIf="events.length === 0 && !error && !isLoading" class="ion-text-center ion-padding">
     <ion-text>
-      <p>No events found nearby. Try adjusting your search or drag the location marker.</p>
+      <p>No events found nearby. Try adjusting your search.</p>
     </ion-text>
   </div>
 
