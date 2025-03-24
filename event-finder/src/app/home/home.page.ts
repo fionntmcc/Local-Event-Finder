@@ -564,6 +564,8 @@ export class HomePage implements OnInit {
         return 'Date';
       case 'category':
         return 'Category';
+      case 'distance':
+        return 'Distance';
       default:
         return '';
     }
@@ -599,9 +601,42 @@ export class HomePage implements OnInit {
           return catA.localeCompare(catB);
         });
         break;
+      case 'distance':
+        // Sort by distance to user's location
+        this.events.sort((a, b) => {
+          // Skip events without location
+          if (!a.location || a.location.length < 2) return 1;
+          if (!b.location || b.location.length < 2) return -1;
+          
+          // Calculate distances using our helper method
+          const distA = this.calculateDistanceInKm(a.location[1], a.location[0]);
+          const distB = this.calculateDistanceInKm(b.location[1], b.location[0]);
+          
+          // Sort by distance (ascending - closest first)
+          return distA - distB;
+        });
+        break;
       default:
         // No sorting (keep the order from the API)
         break;
     }
+  }
+
+  // Helper method to calculate distance in km between user and event location
+  private calculateDistanceInKm(eventLat: number, eventLng: number): number {
+    const userLat = this.locationService.getLatitude();
+    const userLng = this.locationService.getLongitude();
+    
+    const R = 6371; // Earth's radius in km
+    const dLat = this.toRad(eventLat - userLat);
+    const dLng = this.toRad(eventLng - userLng);
+    
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(this.toRad(userLat)) * Math.cos(this.toRad(eventLat)) * 
+      Math.sin(dLng/2) * Math.sin(dLng/2);
+    
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in km
   }
 }
