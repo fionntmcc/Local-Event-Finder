@@ -34,6 +34,7 @@
     "@ionic/storage": "^4.0.0",
     "@ionic/storage-angular": "^4.0.0",
     "cordova-plugin-geolocation": "^5.0.0",
+    "firebase": "^11.5.0",
     "google-maps": "^4.3.3",
     "ionicons": "^7.0.0",
     "rxjs": "~7.8.0",
