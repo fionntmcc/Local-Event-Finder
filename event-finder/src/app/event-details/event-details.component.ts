@@ -153,7 +153,7 @@ export class EventDetailsPage implements OnInit {
       // Test nofification for demo purposes
       // Set notification for 9:00 AM on the event day
       const notificationTimeTest = new Date();
-      notificationTime.setMinutes(notificationTime.getMinutes() + 1);
+      notificationTimeTest.setSeconds(notificationTime.getSeconds() + 5);
 
       try {
         await LocalNotifications.schedule({
