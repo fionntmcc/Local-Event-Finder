@@ -33,7 +33,7 @@ import { FormsModule } from '@angular/forms';
   ],
 })
 export class SettingsPage implements OnInit {
-  // Toggle states
+  // Default states for settings toggles
   notificationsEnabled: boolean = true;
   darkModeEnabled: boolean = false;
   locationEnabled: boolean = true;
@@ -42,33 +42,34 @@ export class SettingsPage implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    // Initialize dark mode from stored preference
+    // Get dark mode preference from storage, or use default (light mode)
     this.darkModeEnabled = localStorage.getItem('darkMode') === 'true';
     this.applyDarkMode(this.darkModeEnabled);
   }
 
-  // Toggle handlers
+  // Handle notification preference changes
   toggleNotifications() {
     console.log('Notifications toggled:', this.notificationsEnabled);
     localStorage.setItem('notifications', this.notificationsEnabled.toString());
-    // Add your notification toggle logic here
   }
 
+  // Switch between light/dark themes
   toggleDarkMode() {
     console.log('Dark mode toggled:', this.darkModeEnabled);
     this.applyDarkMode(this.darkModeEnabled);
-    // Save preference to localStorage
+    // Save user preference for next time they open the app
     localStorage.setItem('darkMode', this.darkModeEnabled.toString());
   }
 
   /* 
+  // Not using this right now - might implement later
   toggleLocation() {
     console.log('Location services toggled:', this.locationEnabled);
     // Add your \location services toggle logic here
   }
   */
 
-  // Apply dark mode to the entire application
+  // Actually change the theme by adding/removing CSS classes
   private applyDarkMode(enable: boolean) {
     const body = document.querySelector('body');
     if (enable) {

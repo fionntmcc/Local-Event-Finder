@@ -67,26 +67,27 @@ import { LocalNotifications } from '@capacitor/local-notifications';
   ]
 })
 export class EventDetailsPage implements OnInit {
-  // inject services
+  // Use dependency injection for services
   private predictHqService = inject(PredictHqService);
   private locationService = inject(LocationService);
   private route = inject(ActivatedRoute);
 
-  // Necessary inits
+  // Track state variables
   public notificationsEnabled = false;
   public event: any = null;
   public isPopupActive: boolean = false;
   public homepage: string = "";
   public status: string = "";
   public eventId: string = "";
-  public eventStatus: boolean = false;
+  public eventStatus: boolean = false; // If event is saved by user
 
   constructor() {
+    // Check if we can show notifications on this device
     this.checkNotificationPermissions();
   }
 
   ngOnInit() {
-    // Get event ID from route parameters
+    // Get the event ID from the URL
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
@@ -97,7 +98,9 @@ export class EventDetailsPage implements OnInit {
 
   }
 
+  // Fetch event details from API and check if user has saved it
   loadEventDetails(id: string) {
+    // Check if this event is in the user's saved events
     this.eventStatus = (localStorage.getItem("events") || "").includes(id);
 
     this.predictHqService.getEventById(id).subscribe((res) => {
@@ -112,6 +115,7 @@ export class EventDetailsPage implements OnInit {
     });
   }
 
+  // Make sure we have permission to send notifications
   async checkNotificationPermissions() {
     const { display } = await LocalNotifications.checkPermissions();
     this.notificationsEnabled = display === 'granted';
@@ -122,6 +126,7 @@ export class EventDetailsPage implements OnInit {
     }
   }
 
+  // Schedule a notification for this event
   async scheduleNotification(event: any) {
     if (!this.notificationsEnabled || !event) return;
 
@@ -151,8 +156,8 @@ export class EventDetailsPage implements OnInit {
         console.error('Error scheduling notification:', error);
       }
 
-      // Test nofification for demo purposes
-      // Set notification for 9:00 AM on the event day
+      // Debug code - sends a test notification 5 seconds from now
+      // This is just for demo purposes, should remove in production
       const notificationTimeTest = new Date();
       notificationTimeTest.setSeconds(notificationTime.getSeconds() + 5);
 
@@ -174,6 +179,7 @@ export class EventDetailsPage implements OnInit {
     }
   }
 
+  // Open the event website in the device browser
   async openEventWebsite() {
     if (this.homepage) {
       await Browser.open({ url: this.homepage });
@@ -182,6 +188,7 @@ export class EventDetailsPage implements OnInit {
     }
   }
 
+  // Open Google Maps with directions to the event
   getDirections() {
     if (!this.event || !this.event.location || !this.event.location.length) return;
 
@@ -192,6 +199,7 @@ export class EventDetailsPage implements OnInit {
     Browser.open({ url });
   }
 
+  // Open the native share dialog
   shareEvent() {
     if (!this.event) return;
 
@@ -208,21 +216,26 @@ export class EventDetailsPage implements OnInit {
     }
   }
 
+  // Toggle whether this event is saved or not
   toggleEventStatus() {
     this.saveStatus();
   }
 
+  // Update the saved events list in localStorage
   async saveStatus() {
     let eventString: string = localStorage.getItem("events") || "";
 
     if (this.eventStatus) {
+      // Add this event to saved events
       eventString += this.eventId + ",";
 
+      // Schedule notification if user has notifications enabled
       if (localStorage.getItem("notifications") === "true") {
         this.scheduleNotification(this.event);
       }
 
     } else {
+      // Remove this event from saved events
       eventString = eventString.replace(this.eventId + ",", "");
 
       // Cancel notification when event is removed
@@ -241,6 +254,7 @@ export class EventDetailsPage implements OnInit {
     console.log(localStorage.getItem("events"));
   }
 
+  // Calculate the distance from user to this event
   getDistance(): string {
     if (!this.event || !this.event.location) return 'Distance unknown';
     return this.locationService.getDistance(this.event.location[1], this.event.location[0]);

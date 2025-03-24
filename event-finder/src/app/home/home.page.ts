@@ -36,6 +36,7 @@ import { StorageService } from '../services/storage.service';
 import { Router } from '@angular/router';
 import { EventCategory } from '../services/predict-hq/event-category';
 
+// Tell TypeScript about Google Maps global variables
 declare global {
   interface Window {
     google: any;
@@ -82,13 +83,13 @@ declare global {
 })
 
 export class HomePage implements OnInit {
-  // inject PredictHqService
+  // Use dependency injection for services
   private predictHqService = inject(PredictHqService);
   private locationService = inject(LocationService);
   private storageService = inject(StorageService);
   private router = inject(Router);
 
-  // Necessary inits
+  // Core variables for app functionality
   private currentPage: number = 1;
   public events: Event[] = [];
   public error = null;
@@ -103,46 +104,47 @@ export class HomePage implements OnInit {
   public center: any = null;
   public userMarker: any = null;
 
-  // Location data now managed by LocationService
+  // Location tracking variables
   public locationAvailable: boolean = false;
   private mapInitialized = false;
   private markers: any[] = [];
 
-  // Search properties
+  // Search functionality
   public searchTerm: string = '';
 
-  // Add pagination tracking variables
+  // Pagination control
   private hasMorePages: boolean = true;
 
-  // Add a flag to track if we're updating via marker drag
+  // Flag to prevent location updates during marker drag
   private updatingViaMarkerDrag: boolean = false;
 
-  // Add a property to control the help toast
+  // Help toast visibility control
   public showDragHelpToast: boolean = true;
 
-  // Add property to track the current sort method
+  // Sorting functionality
   public currentSortMethod: string = 'alphabetical'; // Options: 'none', 'alphabetical', 'date', 'category'
 
-  // Add new properties
+  // Map error handling
   public mapLoadError: boolean = false;
   public mapLoadErrorMessage: string = '';
 
   constructor() {
-    // Initialize the map callback function
+    // Set up the callback for Google Maps
     window.initMap = () => {
       this.initializeMap();
     };
 
-    // Subscribe to location availability
+    // Monitor location availability changes
     this.locationService.isLocationAvailable().subscribe(available => {
       this.locationAvailable = available;
     });
   }
 
   ngOnInit() {
+    // Start loading the map
     this.loadGoogleMapsScript();
 
-    // Subscribe to position changes
+    // Track user position changes
     this.locationService.getCurrentPosition().subscribe(position => {
       if (position) {
         this.updateUserMarkerPosition(position);
@@ -150,22 +152,23 @@ export class HomePage implements OnInit {
     });
   }
 
-  // Load Google Maps API script dynamically
+  // Dynamically load Google Maps JavaScript API
   public loadGoogleMapsScript() {
+    // Only load script if it's not already loaded
     if (!document.querySelectorAll(`[src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_hp1omiThAyvMfBxpdThM57Rl_JCyYek&loading=async&callback=initMap"]`).length) {
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyA_hp1omiThAyvMfBxpdThM57Rl_JCyYek&loading=async&callback=initMap`;
       script.async = true;
       script.defer = true;
       
-      // Add error handling for the script
+      // Handle script loading errors
       script.onerror = () => {
         console.error('Failed to load Google Maps API');
         this.mapLoadError = true;
         this.mapLoadErrorMessage = 'Unable to load Google Maps. If you are using an ad blocker, please disable it for this site.';
       };
       
-      // Add timeout to detect when Google Maps fails silently
+      // Set a timeout to catch silent failures
       const timeoutId = setTimeout(() => {
         if (!window.google || !window.google.maps) {
           console.error('Google Maps API failed to initialize');
@@ -184,8 +187,9 @@ export class HomePage implements OnInit {
     }
   }
 
+  // This runs every time the page becomes active (tab change, navigation)
   ionViewWillEnter() {
-    // reset variables
+    // Reset to default state
     this.currentPage = 1;
     this.events = [];
     this.searchTerm = '';
@@ -194,16 +198,20 @@ export class HomePage implements OnInit {
     this.value = "";
     this.isHelpOpen = false;
     this.isLoading = true;
+    
+    // Get all available event categories
     this.categories = Object.keys(EventCategory).filter((item) => {
       return isNaN(parseInt(item));
     });
+    
+    // Initialize all categories as inactive (no filters)
     this.activeCategories = this.categories.map(() => false);
     this.currentSortMethod = 'none'; // Reset sort method
 
-    // Use the location service to refresh location, then load events
+    // Update user location, then load events
     this.locationService.refreshLocation()
       .then((position) => {
-        // Update user marker position and map center if initialized
+        // Update user marker position and map center
         this.updateUserMarkerPosition(position);
         this.loadEvents();
       })
@@ -213,25 +221,28 @@ export class HomePage implements OnInit {
       });
   }
 
+  // This runs after the view is fully initialized
   ionViewDidEnter() {
-    // If the map script has already loaded, manually initialize the map
+    // Initialize map if Google Maps API is loaded but map isn't initialized yet
     if (window.google && !this.mapInitialized) {
       this.initializeMap();
     }
   }
 
+  // Create and configure the Google Map
   private initializeMap() {
     const mapElement = document.getElementById('map');
     if (mapElement && window.google && window.google.maps) {
       try {
         this.mapInitialized = true;
 
-        // Use location service to get coordinates
+        // Use the user's current location as map center
         const center = {
           lat: this.locationService.getLatitude(),
           lng: this.locationService.getLongitude()
         };
 
+        // Create the map with custom options
         this.map = new window.google.maps.Map(mapElement, {
           center: center,
           zoom: 12,
@@ -239,19 +250,19 @@ export class HomePage implements OnInit {
             {
               featureType: "poi",
               elementType: "labels",
-              stylers: [{ visibility: "off" }]
+              stylers: [{ visibility: "off" }] // Hide points of interest labels to reduce clutter
             }
           ],
-          mapTypeControl: false,
-          streetViewControl: false
+          mapTypeControl: false, // Hide the map/satellite toggle
+          streetViewControl: false // Hide street view
         });
 
-        // Add a marker for the user's location and store reference
+        // Add a marker for the user's location
         this.userMarker = new window.google.maps.Marker({
           position: center,
           map: this.map,
           title: 'Your Location',
-          draggable: true, // Make the marker draggable
+          draggable: true, // User can drag to set a new location
           icon: {
             path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
             scale: 10,
@@ -262,12 +273,12 @@ export class HomePage implements OnInit {
           }
         });
 
-        // Add drag end event listener to the user marker
+        // Handle when user drags the location marker
         window.google.maps.event.addListener(this.userMarker, 'dragend', (event: any) => {
           this.handleMarkerDrag(event);
         });
 
-        // Add event markers when events are loaded
+        // Add markers for all currently loaded events
         this.addEventMarkersToMap();
         
         // Reset error state if map loads successfully
@@ -284,7 +295,7 @@ export class HomePage implements OnInit {
     }
   }
 
-  // Handle marker drag and update location
+  // Process marker drag to update user location
   private handleMarkerDrag(event: any) {
     const newPosition = {
       coords: {
@@ -294,37 +305,38 @@ export class HomePage implements OnInit {
       timestamp: new Date().getTime()
     };
 
-    // Set the flag to prevent multiple refreshes
+    // Set flag to prevent other location updates during this process
     this.updatingViaMarkerDrag = true;
 
-    // Update the map center
+    // Update the map to center on the new position
     this.map.setCenter({
       lat: newPosition.coords.latitude,
       lng: newPosition.coords.longitude
     });
 
-    // Update the location service with new coordinates
+    // Update the app's location data
     this.locationService.setManualLocation(newPosition.coords.latitude, newPosition.coords.longitude);
 
-    // Reset events and reload with new location
+    // Reset and reload events for the new location
     this.events = [];
     this.currentPage = 1;
     this.hasMorePages = true;
     this.loadEvents();
 
-    // Save the updated location to storage
+    // Save the location so it persists between app sessions
     this.storageService.set('userLocation', {
       latitude: newPosition.coords.latitude,
       longitude: newPosition.coords.longitude,
       timestamp: newPosition.timestamp
     });
 
-    // Reset the flag
+    // Now allow other location updates
     this.updatingViaMarkerDrag = false;
   }
 
-  // Modify updateUserMarkerPosition to avoid position updates while dragging
+  // Update the marker when user position changes (e.g. GPS update)
   private updateUserMarkerPosition(position: any) {
+    // Skip updates if map isn't ready or we're in the middle of a marker drag
     if (this.mapLoadError || !this.map || !this.mapInitialized || this.updatingViaMarkerDrag) return;
 
     const newPosition = {
@@ -332,15 +344,15 @@ export class HomePage implements OnInit {
       lng: position.coords.longitude
     };
 
-    // Update user marker position
+    // Move the marker to the new position
     if (this.userMarker) {
       this.userMarker.setPosition(newPosition);
     }
 
-    // Update map center
+    // Recenter the map on the user
     this.map.setCenter(newPosition);
 
-    // Save the current location to storage
+    // Remember this location
     this.storageService.set('userLocation', {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude,
@@ -348,7 +360,7 @@ export class HomePage implements OnInit {
     });
   }
 
-  // Add event markers to map
+  // Create map markers for all events
   private addEventMarkersToMap() {
     if (this.mapLoadError || !this.map || !window.google || !window.google.maps) {
       console.warn('Map not available, skipping marker update');
@@ -357,15 +369,16 @@ export class HomePage implements OnInit {
     this.updateMapMarkersForSearch();
   }
 
-  // initialises events on page startup
+  // Main function to load events from the API
   loadEvents(scroll?: InfiniteScrollCustomEvent) {
     this.error = null;
     this.isLoading = true;
 
-    // Use location service to get coordinates for API call
+    // Get user coordinates for the API call
     const latitude = this.locationService.getLatitude();
     const longitude = this.locationService.getLongitude();
 
+    // Build list of active category filters
     let currentActiveCategories : string[] = [];
     this.activeCategories.forEach((active, index) => {
       if (active) {
@@ -374,28 +387,29 @@ export class HomePage implements OnInit {
     });
     console.log('Current active categories:', currentActiveCategories); 
 
-    // get events on currentPage, now including search term
+    // Call the API with all our parameters
     this.predictHqService.getEvents(this.currentPage, latitude, longitude, this.searchTerm, currentActiveCategories).pipe(
       finalize(() => {
+        // Always run this when request completes (success or error)
         this.isLoading = false;
         if (scroll) {
           scroll.target.complete();
         }
       }),
-      // if error
+      // Handle errors from the API
       catchError((e) => {
         console.log(e);
         this.error = e.error.status_message;
         return [];
       })
     )
-      // create Observable
+      // Subscribe to get the results
       .subscribe({
-        // use next() block
         next: (res) => {
-          // print events to console
+          // Log the response for debugging
           console.log(res);
-          // push event to event array
+          
+          // Add new events to our list
           this.events.push(...res.results);
           
           // Apply sorting if a sort method is active
@@ -404,17 +418,18 @@ export class HomePage implements OnInit {
           }
           
           console.log(this.events);
-          // Add markers to map if map is initialized
+          
+          // Add markers to map for new events
           this.addEventMarkersToMap();
 
-          // Check if we've reached the last page
+          // Check if we've reached the last page of results
           if (res.next) {
             this.hasMorePages = true;
           } else {
             this.hasMorePages = false;
           }
 
-          // disable InfiniteScroll if we've reached the last page
+          // Update infinite scroll component state
           if (scroll) {
             scroll.target.disabled = !this.hasMorePages;
           }
@@ -422,21 +437,21 @@ export class HomePage implements OnInit {
       });
   }
 
-  // Handle the infinite scroll event
+  // Load the next page of events when user scrolls to bottom
   loadMoreEvents(event: InfiniteScrollCustomEvent) {
     if (!this.hasMorePages) {
       event.target.disabled = true;
       return;
     }
 
-    // Increment the page number
+    // Increment the page number for the next API call
     this.currentPage++;
 
     // Load the next page
     this.loadEvents(event);
   }
 
-  // Format date for display
+  // Format date for display in event cards
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -448,16 +463,17 @@ export class HomePage implements OnInit {
     });
   }
 
-  // Use LocationService for distance calculation
+  // Calculate distance from user to event
   getDistance(eventLat: number, eventLng: number): string {
     return this.locationService.getDistance(eventLat, eventLng);
   }
 
+  // Helper for distance calculations
   private toRad(degrees: number): number {
     return degrees * Math.PI / 180;
   }
 
-  // Format currency
+  // Format currency values consistently
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -467,44 +483,46 @@ export class HomePage implements OnInit {
     }).format(amount);
   }
 
-  // Limit the number of labels to display
+  // Limit number of category labels shown for each event
   getLimitedLabels(labels: string[], limit: number): string[] {
     if (!labels) return [];
     return labels.slice(0, limit);
   }
 
-  // Search events based on searchTerm
+  // Handle search feature
   public searchEvents() {
+    // If search is cleared, reset everything
     if (!this.searchTerm.trim()) {
       this.searchTerm = '';
       this.events = [];
-      this.currentPage = 1; // Reset to first page
-      this.hasMorePages = true; // Reset pagination state
-      this.loadEvents(); // Will load events without search term
+      this.currentPage = 1;
+      this.hasMorePages = true;
+      this.loadEvents();
       return;
     }
 
+    // Start a new search
     this.events = []; // Clear current events
     this.currentPage = 1; // Reset to first page
     this.hasMorePages = true; // Reset pagination state
     console.log('Searching for:', this.searchTerm);
 
-    // loadEvents will now use the current searchTerm
+    // Load events matching the search term
     this.loadEvents();
   }
 
-  // Update map markers to display only filtered results
+  // Update map to show only search-filtered events
   updateMapMarkersForSearch() {
     if (this.mapLoadError || !this.map || !window.google || !window.google.maps) {
       console.warn('Map not available, skipping marker update');
       return;
     }
 
-    // Clear existing markers
+    // Remove all existing event markers
     this.markers.forEach(marker => marker.setMap(null));
     this.markers = [];
 
-    // Add new markers for filtered events
+    // Add markers for current filtered events
     this.events.forEach(event => {
       if (event.location && event.location.length >= 2) {
         const marker = new window.google.maps.Marker({
@@ -514,7 +532,7 @@ export class HomePage implements OnInit {
           animation: window.google.maps.Animation.DROP
         });
 
-        // Add click listener to open info window with improved styling
+        // Create an info window with event details
         const infowindow = new window.google.maps.InfoWindow({
           content: `
           <div style="color: black; max-width: 250px; overflow: hidden;">
@@ -534,14 +552,16 @@ export class HomePage implements OnInit {
           pixelOffset: new window.google.maps.Size(0, 0)
         });
 
+        // Show info window when marker is clicked
         marker.addListener('click', () => {
+          // Close any other open info windows
           if (this.openWindow) {
             this.openWindow.close();
           }
           this.openWindow = infowindow;
           infowindow.open(this.map, marker);
 
-          // Add click event after info window is opened
+          // Add click event handler for the "View Details" button
           setTimeout(() => {
             const detailsBtn = document.getElementById(`view-details-${event.id}`);
             if (detailsBtn) {
@@ -552,7 +572,7 @@ export class HomePage implements OnInit {
           }, 300);
         });
 
-        // Close popup if clicked outside
+        // Close popup if user clicks elsewhere on the map
         window.google.maps.event.addListener(this.map, 'click', function () {
           infowindow.close();
         });
@@ -561,7 +581,7 @@ export class HomePage implements OnInit {
       }
     });
 
-    // If we have filtered events and there are results, center the map on the first result
+    // If we're searching and have results, zoom to the first result
     if (this.searchTerm && this.events.length > 0 &&
       this.events[0].location &&
       this.events[0].location.length >= 2) {
@@ -573,22 +593,24 @@ export class HomePage implements OnInit {
     }
   }
 
+  // Apply category filters
   applyFilters() {
     this.events = [];
-    this.currentPage = 1; // Reset to first page
-    this.hasMorePages = true; // Reset pagination state
-    this.loadEvents(); // Will load events with selected categories
+    this.currentPage = 1;
+    this.hasMorePages = true;
+    this.loadEvents();
   }
 
-  // Clear search and reset to all events
+  // Reset search to show all events
   clearSearch() {
     this.searchTerm = '';
     this.events = [];
-    this.currentPage = 1; // Reset to first page
-    this.hasMorePages = true; // Reset pagination state
-    this.loadEvents(); // Will load events without search term
+    this.currentPage = 1;
+    this.hasMorePages = true;
+    this.loadEvents();
   }
 
+  // Toggle a category filter on/off
   toggleCategory(category: string) {
     const index = this.categories.indexOf(category);
     if (index > -1) {
@@ -597,12 +619,12 @@ export class HomePage implements OnInit {
     }
   }
 
-  // Add a method to navigate to event details
+  // Navigate to event details page
   navigateToEventDetails(eventId: string) {
     this.router.navigate(['/event', eventId]);
   }
 
-  // Function to get a user-friendly label for the current sort method
+  // Get user-friendly name for the current sort method
   public getSortMethodLabel(): string {
     switch (this.currentSortMethod) {
       case 'alphabetical':
@@ -618,30 +640,33 @@ export class HomePage implements OnInit {
     }
   }
 
-  // Reset sorting to default
+  // Reset to default sorting
   resetSorting(): void {
     this.currentSortMethod = 'alphabetical';
     this.sortAndUpdateEvents();
   }
 
-  // Sort events based on the selected method
+  // Change sorting method
   sortEvents(method: string): void {
     this.currentSortMethod = method;
     this.sortAndUpdateEvents();
   }
 
-  // Apply the current sort method to the events array
+  // Apply current sort method to events list
   sortAndUpdateEvents(): void {
     if (!this.events || this.events.length === 0) return;
 
     switch (this.currentSortMethod) {
       case 'alphabetical':
+        // Sort alphabetically by title
         this.events.sort((a, b) => a.title.localeCompare(b.title));
         break;
       case 'date':
+        // Sort by start date (earliest first)
         this.events.sort((a, b) => new Date(a.start_local).getTime() - new Date(b.start_local).getTime());
         break;
       case 'category':
+        // Sort by primary category label
         this.events.sort((a, b) => {
           const catA = a.labels && a.labels.length > 0 ? a.labels[0] : 'zzz'; // 'zzz' to sort events without category last
           const catB = b.labels && b.labels.length > 0 ? b.labels[0] : 'zzz';
@@ -649,13 +674,13 @@ export class HomePage implements OnInit {
         });
         break;
       case 'distance':
-        // Sort by distance to user's location
+        // Sort by distance to user (closest first)
         this.events.sort((a, b) => {
           // Skip events without location
           if (!a.location || a.location.length < 2) return 1;
           if (!b.location || b.location.length < 2) return -1;
           
-          // Calculate distances using our helper method
+          // Calculate distances
           const distA = this.calculateDistanceInKm(a.location[1], a.location[0]);
           const distB = this.calculateDistanceInKm(b.location[1], b.location[0]);
           
@@ -669,11 +694,12 @@ export class HomePage implements OnInit {
     }
   }
 
-  // Helper method to calculate distance in km between user and event location
+  // Calculate distance between user and event
   private calculateDistanceInKm(eventLat: number, eventLng: number): number {
     const userLat = this.locationService.getLatitude();
     const userLng = this.locationService.getLongitude();
     
+    // Use Haversine formula to calculate distance on a sphere
     const R = 6371; // Earth's radius in km
     const dLat = this.toRad(eventLat - userLat);
     const dLng = this.toRad(eventLng - userLng);

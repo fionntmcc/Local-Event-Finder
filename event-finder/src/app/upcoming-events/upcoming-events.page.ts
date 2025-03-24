@@ -50,20 +50,24 @@ export class UpcomingEventsPage {
 
   constructor() { }
 
+  // Store user's saved events
   public upcomingEvents: any[] = [];
   public eventIds: string[] = [];
 
+  // Runs every time the page becomes active
   ionViewWillEnter() {
+    // Get saved event IDs from local storage
     this.eventIds = (localStorage.getItem('events') || "").split(",").filter((id: string) => id !== "");
     console.log("Event ids:");
     console.log(this.eventIds);
     this.upcomingEvents = [];
 
+    // Fetch details for each saved event
     this.eventIds.forEach((id: string) => {
       this.predictHqService.getEventById(id).subscribe((event: any) => {
         if (event?.results?.[0]) {
           const eventData = event.results[0];
-          // Ensure the event has a start date before adding it
+          // Skip events without a start date (shouldn't happen, but just in case)
           if (eventData.start) {
             this.upcomingEvents.push(eventData);
             this.scheduleNotification(eventData);
@@ -75,6 +79,7 @@ export class UpcomingEventsPage {
     });
   }
 
+  // Set up notifications for events on the day they happen
   async scheduleNotification(event: any) {
     if (!this.notificationsEnabled || !event) return;
 
@@ -91,6 +96,7 @@ export class UpcomingEventsPage {
       try {
         await LocalNotifications.schedule({
           notifications: [{
+            // Create a unique ID from the event ID (hacky but works)
             id: parseInt(event.id.replace(/\D/g, '').substring(0, 8) || '1'),
             title: 'Event Today: ' + event.title,
             body: `Don't forget your event "${event.title}" is today!`,
@@ -106,6 +112,7 @@ export class UpcomingEventsPage {
     }
   }
 
+  // Open native share dialog to share event with friends
   shareEvent(event: any) {
     console.log("Sharing event with ID: " + event.id);
     if (!event) return;
@@ -123,6 +130,7 @@ export class UpcomingEventsPage {
     }
   }
 
+  // Remove event from saved list and cancel its notification
   async removeEvent(eventId: string) {
     console.log("Removing event with ID: " + eventId);
     this.eventIds = this.eventIds.filter((id: string) => id !== eventId);
