@@ -121,7 +121,7 @@ export class HomePage implements OnInit {
   public showDragHelpToast: boolean = true;
 
   // Add property to track the current sort method
-  public currentSortMethod: string = 'none'; // Options: 'none', 'alphabetical', 'date', 'category'
+  public currentSortMethod: string = 'alphabetical'; // Options: 'none', 'alphabetical', 'date', 'category'
 
   // Add new properties
   public mapLoadError: boolean = false;
@@ -603,7 +603,7 @@ export class HomePage implements OnInit {
   }
 
   // Function to get a user-friendly label for the current sort method
-  getSortMethodLabel(): string {
+  public getSortMethodLabel(): string {
     switch (this.currentSortMethod) {
       case 'alphabetical':
         return 'Alphabetical';
@@ -620,7 +620,7 @@ export class HomePage implements OnInit {
 
   // Reset sorting to default
   resetSorting(): void {
-    this.currentSortMethod = 'none';
+    this.currentSortMethod = 'alphabetical';
     this.sortAndUpdateEvents();
   }
 

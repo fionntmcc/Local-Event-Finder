@@ -10,34 +10,29 @@
   <!-- Search Bar with embedded button -->
   <div class="search-container">
     <div class="search-wrapper">
-      <ion-searchbar 
-        [(ngModel)]="searchTerm" 
-        (ionChange)="searchEvents()"
-        placeholder="Search events, categories or places"
-        animated
-        debounce="300"
-        show-clear-button="always">
+      <ion-searchbar [(ngModel)]="searchTerm" (ionChange)="searchEvents()"
+        placeholder="Search events, categories or places" animated debounce="300" show-clear-button="always">
       </ion-searchbar>
-      
+
       <ion-button class="category-filter-btn" id="category-filter-btn" fill="clear">
         Filter
       </ion-button>
-      
+
       <!-- Add sort button -->
       <ion-button class="sort-btn" id="sort-btn" fill="clear">
         Sort
       </ion-button>
     </div>
-    
+
     <ion-chip *ngIf="searchTerm" (click)="clearSearch()" color="medium">
       <ion-label>Clear</ion-label>
     </ion-chip>
-    
+
     <!-- Display current sort order -->
-    <ion-chip *ngIf="currentSortMethod !== 'none'" color="tertiary">
+    <!-- <ion-chip *ngIf="currentSortMethod !== 'none'" color="tertiary">
       <ion-label>Sorted by: {{ getSortMethodLabel() }}</ion-label>
       <ion-icon name="close-circle" (click)="resetSorting()"></ion-icon>
-    </ion-chip>
+    </ion-chip> -->
   </div>
 
   <!-- Category Filter Popover -->
@@ -49,7 +44,8 @@
             <ion-label>Event Categories</ion-label>
           </ion-list-header>
           <ion-item *ngFor="let category of categories">
-            <ion-checkbox [value]="category" (click)="toggleCategory(category)" labelPlacement="end">{{ category | titlecase }}</ion-checkbox>
+            <ion-checkbox [value]="category" (click)="toggleCategory(category)" labelPlacement="end">{{ category |
+              titlecase }}</ion-checkbox>
           </ion-item>
         </ion-list>
         <div class="popover-footer">
@@ -123,15 +119,18 @@
       <ion-label>
         <h2>{{ event.title }}</h2>
         <p>{{ formatDate(event.start_local) }}</p>
-        <p *ngIf="event.location && event.location.length >= 2">{{ getDistance(event.location[1], event.location[0]) }} away</p>
+        <p *ngIf="event.location && event.location.length >= 2">{{ getDistance(event.location[1], event.location[0]) }}
+          away</p>
         <!-- <p *ngIf="event.predicted_event_spend > 0">Est. cost: {{ formatCurrency(event.predicted_event_spend) }}</p> -->
-        <p *ngIf="event.description">{{ event.description.length == 26 ? "No description" : event.description.replace('Sourced from predicthq.com - ', '') }}{{ event.description.length > 100 ?
+        <p *ngIf="event.description">{{ event.description.length == 26 ? "No description" :
+          event.description.replace('Sourced from predicthq.com - ', '') }}{{ event.description.length > 100 ?
           '...' : '' }}</p>
         <ion-chip *ngFor="let label of getLimitedLabels(event.labels, 3)" class="small-chip">
           {{ label }}
         </ion-chip>
       </ion-label>
-      <ion-badge slot="end" class="p-2" color="primary">{{ event.labels && event.labels.length > 0 ? event.labels[0] : 'Event' }}</ion-badge>
+      <ion-badge slot="end" class="p-2" color="primary">{{ event.labels && event.labels.length > 0 ? event.labels[0] :
+        'Event' }}</ion-badge>
     </ion-item>
   </ion-list>
 
