@@ -123,6 +123,10 @@ export class HomePage implements OnInit {
   // Add property to track the current sort method
   public currentSortMethod: string = 'none'; // Options: 'none', 'alphabetical', 'date', 'category'
 
+  // Add new properties
+  public mapLoadError: boolean = false;
+  public mapLoadErrorMessage: string = '';
+
   constructor() {
     // Initialize the map callback function
     window.initMap = () => {
@@ -147,12 +151,35 @@ export class HomePage implements OnInit {
   }
 
   // Load Google Maps API script dynamically
-  private loadGoogleMapsScript() {
+  public loadGoogleMapsScript() {
     if (!document.querySelectorAll(`[src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_hp1omiThAyvMfBxpdThM57Rl_JCyYek&loading=async&callback=initMap"]`).length) {
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyA_hp1omiThAyvMfBxpdThM57Rl_JCyYek&loading=async&callback=initMap`;
       script.async = true;
       script.defer = true;
+      
+      // Add error handling for the script
+      script.onerror = () => {
+        console.error('Failed to load Google Maps API');
+        this.mapLoadError = true;
+        this.mapLoadErrorMessage = 'Unable to load Google Maps. If you are using an ad blocker, please disable it for this site.';
+      };
+      
+      // Add timeout to detect when Google Maps fails silently
+      const timeoutId = setTimeout(() => {
+        if (!window.google || !window.google.maps) {
+          console.error('Google Maps API failed to initialize');
+          this.mapLoadError = true;
+          this.mapLoadErrorMessage = 'Unable to load Google Maps. If you are using an ad blocker, please disable it for this site.';
+        }
+      }, 10000); // 10 second timeout
+      
+      // Clear timeout if maps loads successfully
+      window.initMap = () => {
+        clearTimeout(timeoutId);
+        this.initializeMap();
+      };
+      
       document.body.appendChild(script);
     }
   }
@@ -195,52 +222,65 @@ export class HomePage implements OnInit {
 
   private initializeMap() {
     const mapElement = document.getElementById('map');
-    if (mapElement && window.google) {
-      this.mapInitialized = true;
+    if (mapElement && window.google && window.google.maps) {
+      try {
+        this.mapInitialized = true;
 
-      // Use location service to get coordinates
-      const center = {
-        lat: this.locationService.getLatitude(),
-        lng: this.locationService.getLongitude()
-      };
+        // Use location service to get coordinates
+        const center = {
+          lat: this.locationService.getLatitude(),
+          lng: this.locationService.getLongitude()
+        };
 
-      this.map = new window.google.maps.Map(mapElement, {
-        center: center,
-        zoom: 12,
-        styles: [
-          {
-            featureType: "poi",
-            elementType: "labels",
-            stylers: [{ visibility: "off" }]
+        this.map = new window.google.maps.Map(mapElement, {
+          center: center,
+          zoom: 12,
+          styles: [
+            {
+              featureType: "poi",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }]
+            }
+          ],
+          mapTypeControl: false,
+          streetViewControl: false
+        });
+
+        // Add a marker for the user's location and store reference
+        this.userMarker = new window.google.maps.Marker({
+          position: center,
+          map: this.map,
+          title: 'Your Location',
+          draggable: true, // Make the marker draggable
+          icon: {
+            path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+            scale: 10,
+            fillColor: '#4285F4',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 2
           }
-        ],
-        mapTypeControl: false,
-        streetViewControl: false
-      });
+        });
 
-      // Add a marker for the user's location and store reference
-      this.userMarker = new window.google.maps.Marker({
-        position: center,
-        map: this.map,
-        title: 'Your Location',
-        draggable: true, // Make the marker draggable
-        icon: {
-          path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-          scale: 10,
-          fillColor: '#4285F4',
-          fillOpacity: 1,
-          strokeColor: '#ffffff',
-          strokeWeight: 2
-        }
-      });
+        // Add drag end event listener to the user marker
+        window.google.maps.event.addListener(this.userMarker, 'dragend', (event: any) => {
+          this.handleMarkerDrag(event);
+        });
 
-      // Add drag end event listener to the user marker
-      window.google.maps.event.addListener(this.userMarker, 'dragend', (event: any) => {
-        this.handleMarkerDrag(event);
-      });
-
-      // Add event markers when events are loaded
-      this.addEventMarkersToMap();
+        // Add event markers when events are loaded
+        this.addEventMarkersToMap();
+        
+        // Reset error state if map loads successfully
+        this.mapLoadError = false;
+        this.mapLoadErrorMessage = '';
+      } catch (error) {
+        console.error('Error initializing map:', error);
+        this.mapLoadError = true;
+        this.mapLoadErrorMessage = 'Error initializing Google Maps. Please refresh the page or try again later.';
+      }
+    } else if (!window.google || !window.google.maps) {
+      this.mapLoadError = true;
+      this.mapLoadErrorMessage = 'Google Maps could not be loaded. This may be due to an ad blocker or network issue.';
     }
   }
 
@@ -285,7 +325,7 @@ export class HomePage implements OnInit {
 
   // Modify updateUserMarkerPosition to avoid position updates while dragging
   private updateUserMarkerPosition(position: any) {
-    if (!this.map || !this.mapInitialized || this.updatingViaMarkerDrag) return;
+    if (this.mapLoadError || !this.map || !this.mapInitialized || this.updatingViaMarkerDrag) return;
 
     const newPosition = {
       lat: position.coords.latitude,
@@ -310,6 +350,10 @@ export class HomePage implements OnInit {
 
   // Add event markers to map
   private addEventMarkersToMap() {
+    if (this.mapLoadError || !this.map || !window.google || !window.google.maps) {
+      console.warn('Map not available, skipping marker update');
+      return;
+    }
     this.updateMapMarkersForSearch();
   }
 
@@ -451,7 +495,10 @@ export class HomePage implements OnInit {
 
   // Update map markers to display only filtered results
   updateMapMarkersForSearch() {
-    if (!this.map || !window.google) return;
+    if (this.mapLoadError || !this.map || !window.google || !window.google.maps) {
+      console.warn('Map not available, skipping marker update');
+      return;
+    }
 
     // Clear existing markers
     this.markers.forEach(marker => marker.setMap(null));

@@ -86,7 +86,16 @@
 
   <!-- Map Section -->
   <div class="map-container">
-    <div id="map" class="map-canvas"></div>
+    <div id="map" class="map-canvas" *ngIf="!mapLoadError"></div>
+    <div *ngIf="mapLoadError" class="map-error">
+      <ion-text color="danger">
+        <h5>{{ mapLoadErrorMessage }}</h5>
+        <p>Events will still be displayed below, but the map functionality is unavailable.</p>
+        <ion-button (click)="loadGoogleMapsScript()" expand="block" fill="outline">
+          Retry Loading Map
+        </ion-button>
+      </ion-text>
+    </div>
   </div>
 
   <div *ngIf="events.length === 0 && !error && !isLoading" class="ion-text-center ion-padding">
