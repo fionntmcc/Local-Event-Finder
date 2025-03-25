@@ -22,7 +22,7 @@ export class StorageService {
   // Create and expose methods that users of this service can
   // call, for example:
   public async set(key: string, value: any) {
-    let res = await this._storage?.set(key, value);
+    let res = await this._storage?.set(key, JSON.stringify(value));
     console.log(res);
   }
   
