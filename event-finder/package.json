@@ -11,6 +11,9 @@
     "test": "ng test",
     "lint": "ng lint"
   },
+  "engines": {
+    "npm": ">=6.0.0"
+  },
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.0.0",
