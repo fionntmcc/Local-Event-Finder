@@ -18,46 +18,15 @@
   <div class="search-container">
     <div class="search-wrapper">
       <ion-searchbar [(ngModel)]="searchTerm" (ionChange)="searchEvents()"
-        placeholder="Search events, categories or places" animated debounce="300" show-clear-button="always">
+        placeholder="Search events, genres or places" animated debounce="300" show-clear-button="always">
       </ion-searchbar>
-
-      <!-- <ion-button class="category-filter-btn" id="category-filter-btn" fill="clear">
-        Filter
-      </ion-button> -->
     </div>
 
     <ion-chip *ngIf="searchTerm" (click)="clearSearch()" color="medium">
       <ion-label>Clear</ion-label>
       <ion-icon name="close-circle"></ion-icon>
     </ion-chip>
-
-    <!-- Display current sort order -->
-    <!-- <ion-chip *ngIf="currentSortMethod !== 'none'" color="tertiary">
-      <ion-label>Sorted by: {{ getSortMethodLabel() }}</ion-label>
-      <ion-icon name="close-circle" (click)="resetSorting()"></ion-icon>
-    </ion-chip> -->
   </div>
-
-  <!-- 
-  <ion-popover trigger="category-filter-btn" [dismissOnSelect]="false" side="bottom">
-    <ng-template>
-      <ion-content>
-        <ion-list lines="full">
-          <ion-list-header>
-            <ion-label>Event Categories</ion-label>
-          </ion-list-header>
-          <ion-item *ngFor="let category of categories">
-            <ion-checkbox [value]="category" (click)="toggleCategory(category)" labelPlacement="end">{{ category |
-              titlecase }}</ion-checkbox>
-          </ion-item>
-        </ion-list>
-        <div class="popover-footer">
-          <ion-button (click)="applyFilters()">Apply</ion-button>
-        </div>
-      </ion-content>
-    </ng-template>
-  </ion-popover>
-  -->
 
   <!-- Sort button with popover -->
   <ion-popover trigger="sort-btn" [dismissOnSelect]="true" side="bottom">
@@ -144,11 +113,7 @@
         <p *ngIf="event.info">{{ event.info.length > 100 ? event.info.substring(0, 100) + '...' : event.info }}</p>
         <p *ngIf="!event.info && event.pleaseNote">{{ event.pleaseNote.length > 100 ? event.pleaseNote.substring(0, 100)
           + '...' : event.pleaseNote }}</p>
-        <!-- <ion-chip *ngFor="let label of getEventCategories(event).slice(0, 3)" class="small-chip">
-          {{ label }}
-        </ion-chip> -->
       </ion-label>
-      <!-- <ion-badge slot="end" class="p-2" color="primary">{{ getPrimaryCategory(event) }}</ion-badge> -->
     </ion-item>
   </ion-list>
 

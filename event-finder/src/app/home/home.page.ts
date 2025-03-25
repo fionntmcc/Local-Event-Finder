@@ -28,7 +28,6 @@ import { finalize, catchError } from 'rxjs';
 import { LocationService } from '../services/location/location.service';
 import { StorageService } from '../services/storage.service';
 import { Router } from '@angular/router';
-import { EventCategory } from '../services/predict-hq/event-category';
 import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
 import { TicketmasterResult } from '../services/ticketmaster/interfaces';
 import { 
@@ -98,8 +97,6 @@ export class HomePage implements OnInit {
   public isLoading: boolean = false;
   public map: any;
   public openWindow: any = null;
-  public categories: string[] = [];
-  public activeCategories: boolean[] = [];
   public center: any = null;
   public userMarker: any = null;
 
@@ -205,13 +202,6 @@ export class HomePage implements OnInit {
     this.isHelpOpen = false;
     this.isLoading = true;
 
-    // Get all available event categories
-    this.categories = Object.keys(EventCategory).filter((item) => {
-      return isNaN(parseInt(item));
-    });
-
-    // Initialize all categories as inactive (no filters)
-    this.activeCategories = this.categories.map(() => false);
     this.currentSortMethod = 'distance'; // Reset sort method
 
     // Update user location, then load events
@@ -390,7 +380,6 @@ export class HomePage implements OnInit {
       long: longitude,
       keyword: this.searchTerm || undefined,
       radius: 200, // Default radius in miles
-      eventType: this.getActiveEventTypes()
     };
 
     // Call the Ticketmaster API
@@ -498,12 +487,6 @@ export class HomePage implements OnInit {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
-  }
-
-  // Limit number of category labels shown for each event
-  getLimitedLabels(labels: string[], limit: number): string[] {
-    if (!labels) return [];
-    return labels.slice(0, limit);
   }
 
   // Handle search feature
@@ -620,7 +603,7 @@ export class HomePage implements OnInit {
     }
   }
 
-  // Apply category filters
+  // Apply filters
   applyFilters() {
     this.events = [];
     this.currentPage = 1;
@@ -637,15 +620,6 @@ export class HomePage implements OnInit {
     this.loadEvents();
   }
 
-  // Toggle a category filter on/off
-  toggleCategory(category: string) {
-    const index = this.categories.indexOf(category);
-    if (index > -1) {
-      this.activeCategories[index] = !this.activeCategories[index];
-      console.log('Active categories:', this.activeCategories);
-    }
-  }
-
   // Navigate to event details page
   navigateToEventDetails(eventId: string) {
     this.router.navigate(['/event', eventId]);
@@ -658,8 +632,6 @@ export class HomePage implements OnInit {
         return 'Alphabetical';
       case 'date':
         return 'Date';
-      case 'category':
-        return 'Category';
       case 'distance':
         return 'Distance';
       default:
@@ -695,14 +667,6 @@ export class HomePage implements OnInit {
           const dateB = b.dates && b.dates.start ? new Date(b.dates.start.dateTime || b.dates.start.localDate).getTime() : 0;
           return dateA - dateB;
         });
-        break;
-      case 'category':
-        // Sort by primary category
-        /* this.events.sort((a, b) => {
-          const catA = this.getPrimaryCategory(a);
-          const catB = this.getPrimaryCategory(b);
-          return catA.localeCompare(catB);
-        }); */
         break;
       case 'distance':
         // Sort by distance to user (closest first)
@@ -775,7 +739,6 @@ export class HomePage implements OnInit {
         long: this.locationService.getLongitude(),
         keyword: this.searchTerm || undefined,
         radius: 200,
-        eventType: this.getActiveEventTypes()
       }
     ).pipe(
       finalize(() => {
@@ -815,17 +778,6 @@ export class HomePage implements OnInit {
         }
       },
     });
-  }
-
-  // Helper method to get active event types
-  private getActiveEventTypes(): string | undefined {
-    let currentActiveCategories: string[] = [];
-    this.activeCategories.forEach((active, index) => {
-      if (active) {
-        currentActiveCategories.push(this.categories[index]);
-      }
-    });
-    return currentActiveCategories.length > 0 ? currentActiveCategories.join(',') : undefined;
   }
 
   // Get a suitable image URL for an event
