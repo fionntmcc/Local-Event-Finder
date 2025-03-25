@@ -48,23 +48,15 @@ npx cap init
 npx cap add android
 ```
 
-5. Configure the Google Maps API key:
+5. Configure the Ticketmaster API and Google Maps API keys:
 
-- Open `src/index.html` and add your Google Maps API key:
-
-```html
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
-```
-
-6. Configure the PredictHQ API key:
-
-- Open `src/environments/environment.ts` and add your PredictHQ API key:
+- Open `src/environments/environment.ts` and add your Ticketmaster API key:
 
 ```typescript
 export const environment = {
   production: false,
-  event_finder_api_key: 'YOUR_PREDICTHQ_API_KEY',
-  event_finder_api_url: 'https://api.predicthq.com/v1/events'
+  ticketmaster_api_key: 'YOUR_TICKETMASTER_API_KEY',
+  google_maps_api_key: 'YOUR_GOOGLE_MAPS_API_KEY',
 };
 ```
 
@@ -106,10 +98,6 @@ npx cap open android
 - Mark local events to receive notification reminders ahead of time.
 - Toggle dark mode and notifications on the settings page.
 
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
-
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
@@ -120,3 +108,4 @@ This project is licensed under the MIT License. See the LICENSE file for details
 - [Google Maps](https://developers.google.com/maps) for providing the mapping API.
 - [Ionic Framework](https://ionicframework.com/) for providing the mobile app framework.
 - [Capacitor](https://capacitorjs.com/) for providing the native runtime for web apps.
+- [Firebase](https://firebase.google.com/) for web deployment.
