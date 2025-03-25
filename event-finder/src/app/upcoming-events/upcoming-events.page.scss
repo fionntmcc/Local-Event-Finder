@@ -87,10 +87,10 @@ ion-item.event-item {
     
     span {
       font-size: 14px;
-      color: var(--ion-color-dark);
+      color: var(--ion-text-color); // Use Ionic's text color variable instead of hardcoded dark
       
       &.description {
-        color: var(--ion-color-medium);
+        color: var(--ion-color-step-600); // Use step-600 for better visibility in both modes
         line-height: 1.4;
       }
     }
@@ -147,4 +147,24 @@ ion-item.event-item {
   align-items: center;
   justify-content: center;
   margin: auto;
+}
+
+/* Dark mode specific overrides */
+:host-context(.dark) {
+  .event-details .event-detail span {
+    color: var(--ion-color-light); // Use light color for text in dark mode
+    
+    &.description {
+      color: var(--ion-color-step-700); // Brighter color for descriptions in dark mode
+    }
+  }
+
+  .event-title {
+    color: var(--ion-color-light); // Ensure title is visible in dark mode
+  }
+
+  .event-card {
+    background-color: var(--ion-background-color); // Use theme background color
+    border: 1px solid var(--ion-color-step-150); // Add subtle border in dark mode
+  }
 }

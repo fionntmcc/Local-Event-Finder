@@ -65,6 +65,15 @@ export class UpcomingEventsPage {
   public loading = true;
   public error = false;
 
+  // Add helper method to convert time string to Date object
+  convertTimeToDate(timeString: string): Date {
+    if (!timeString) return new Date();
+    
+    const [hours, minutes, seconds] = timeString.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, seconds);
+    return date;
+  }
 
   // Runs every time the page becomes active
   ionViewWillEnter() {

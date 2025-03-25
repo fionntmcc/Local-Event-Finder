@@ -6,7 +6,7 @@
     <!-- Add sort button in the toolbar -->
     <ion-buttons slot="end">
       <ion-button id="sort-btn">
-        Sort
+        Sort By: {{ currentSortMethod }}
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -85,7 +85,7 @@
                 <div class="event-detail" *ngIf="event.dates?.start?.localDate">
                   <span>{{ event.dates.start.localDate | date:'E, MMM d, y' }}
                     <ng-container *ngIf="event.dates.start.localTime">
-                      • {{ event.dates.start.localTime | date:'h:mm a' }}
+                      • {{ convertTimeToDate(event.dates.start.localTime) | date:'h:mm a' }}
                     </ng-container>
                   </span>
                 </div>
