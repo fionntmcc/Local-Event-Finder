@@ -28,6 +28,7 @@ import {
 } from '@ionic/angular/standalone';
 import { PredictHqService } from '../services/predict-hq/predict-hq.service';
 import { LocationService } from '../services/location/location.service';
+import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
 import { Browser } from '@capacitor/browser';
 import { LocalNotifications } from '@capacitor/local-notifications';
 // import { Event } from '../services/predict-hq/interfaces';
@@ -68,8 +69,9 @@ import { LocalNotifications } from '@capacitor/local-notifications';
 })
 export class EventDetailsPage implements OnInit {
   // Use dependency injection for services
-  private predictHqService = inject(PredictHqService);
+  // private predictHqService = inject(PredictHqService);
   private locationService = inject(LocationService);
+  private ticketmasterService = inject(TicketmasterService);
   private route = inject(ActivatedRoute);
 
   // Track state variables
@@ -103,10 +105,11 @@ export class EventDetailsPage implements OnInit {
     // Check if this event is in the user's saved events
     this.eventStatus = (localStorage.getItem("events") || "").includes(id);
 
-    this.predictHqService.getEventById(id).subscribe((res) => {
-      if (res && res.results && res.results.length) {
-        this.event = res.results[0];
+    this.ticketmasterService.getEventById(id).subscribe((res) => {
+      if (res) {
+        this.event = res;
 
+        console.log('Event details:', this.event);
         // Set homepage URL if available
         if (this.event.url) {
           this.homepage = this.event.url;

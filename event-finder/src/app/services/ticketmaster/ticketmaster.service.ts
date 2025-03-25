@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { TicketmasterResult } from './interfaces';
+import { TicketmasterResult, Event } from './interfaces';
 
 const API_KEY = environment.ticketmaster_api_key;
 const API_URL = environment.ticketmaster_api_url;
@@ -69,11 +69,11 @@ export class TicketmasterService {
   }
   
   // Get a specific event by its ID
-  getEventById(eventId: string): Observable<any> {
+  getEventById(eventId: string): Observable<Event> {
     // Change to the correct Ticketmaster event details endpoint format
-    const url = `${API_URL}/events/${eventId}?apikey=${API_KEY}`;
+    const url = `https://app.ticketmaster.com/discovery/v2/events/${eventId}?apikey=${API_KEY}`;
     
     console.log('Making API request to:', url);
-    return this.httpClient.get(url);
+    return this.httpClient.get<Event>(url);
   }
 }

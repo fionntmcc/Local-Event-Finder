@@ -20,6 +20,7 @@
 .event-container {
   display: flex;
   flex-direction: column;
+  padding-bottom: 2rem;
   
   .event-image {
     width: 100%;
@@ -30,6 +31,29 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+    }
+  }
+  
+  .event-image-card {
+    margin: 0;
+    box-shadow: none;
+    border-radius: 0;
+    
+    img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+    
+    ion-card-header {
+      padding: 16px;
+      background-color: var(--ion-color-primary);
+      
+      ion-card-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
     }
   }
   
@@ -47,6 +71,59 @@
       font-size: 1.2rem;
       color: #026cdf; // Ticketmaster blue
       margin: 1rem 0 0.5rem;
+    }
+  }
+  
+  .event-details-list {
+    margin-top: 0;
+    padding: 0;
+    
+    ion-list-header {
+      padding-top: 16px;
+      font-size: 1.1rem;
+      color: var(--ion-color-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    ion-item {
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --inner-padding-end: 0;
+      
+      ion-icon {
+        color: var(--ion-color-primary);
+        font-size: 1.4rem;
+        margin-right: 16px;
+      }
+      
+      ion-label {
+        h2 {
+          font-size: 1rem;
+          font-weight: 500;
+          color: var(--ion-color-medium);
+          margin-bottom: 4px;
+        }
+        
+        p {
+          font-size: 1.1rem;
+          color: var(--ion-color-dark);
+          line-height: 1.4;
+        }
+      }
+      
+      &.description-item {
+        --min-height: auto;
+        
+        ion-label {
+          white-space: normal;
+          
+          p {
+            margin-top: 8px;
+            white-space: pre-line;
+          }
+        }
+      }
     }
   }
   
@@ -77,20 +154,32 @@
   .categories-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 8px;
+    margin-top: 8px;
     
     ion-chip {
-      background-color: #f8f8f8;
-      color: #026cdf; // Ticketmaster blue
+      margin: 0;
+      --background: var(--ion-color-primary-tint);
+      --color: var(--ion-color-primary-contrast);
+      font-weight: 500;
     }
   }
   
   .ticket-info {
     margin-top: 1.5rem;
+    padding: 16px;
     
     ion-button {
-      --background: #026cdf; // Ticketmaster blue
-      font-weight: bold;
+      --border-radius: 8px;
+      height: 48px;
+      font-weight: 600;
+      text-transform: none;
+      font-size: 1.1rem;
+      
+      ion-icon {
+        font-size: 1.2rem;
+        margin-right: 8px;
+      }
     }
   }
 }

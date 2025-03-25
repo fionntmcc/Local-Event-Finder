@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TicketmasterService } from '../../services/ticketmaster/ticketmaster.service';
+import { Event } from '../../services/ticketmaster/interfaces';
 
 @Component({
   selector: 'app-event-details',
@@ -8,7 +9,7 @@ import { TicketmasterService } from '../../services/ticketmaster/ticketmaster.se
   styleUrls: ['./event-details.page.scss'],
 })
 export class EventDetailsPage implements OnInit {
-  event: any;
+  event: Event | null = null;
   loading = true;
   error = false;
 
@@ -35,7 +36,7 @@ export class EventDetailsPage implements OnInit {
     }
 
     this.ticketmasterService.getEventById(eventId).subscribe({
-      next: (response: any) => {
+      next: (response: Event) => {
         // The event data might be in a different structure
         console.log('Raw API response:', response);
         
