@@ -1,0 +1,96 @@
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  
+  ion-spinner, ion-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  ion-icon {
+    color: var(--ion-color-danger);
+  }
+}
+
+.event-container {
+  display: flex;
+  flex-direction: column;
+  
+  .event-image {
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+  
+  .event-details {
+    padding: 1rem;
+    
+    h1 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      color: #026cdf; // Ticketmaster blue
+    }
+    
+    h2 {
+      font-size: 1.2rem;
+      color: #026cdf; // Ticketmaster blue
+      margin: 1rem 0 0.5rem;
+    }
+  }
+  
+  .event-meta {
+    margin-bottom: 1rem;
+    
+    .meta-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      
+      ion-icon {
+        margin-right: 0.5rem;
+        color: #026cdf; // Ticketmaster blue
+      }
+    }
+  }
+  
+  .event-description {
+    margin-bottom: 1rem;
+    
+    p {
+      line-height: 1.5;
+      color: var(--ion-color-medium);
+    }
+  }
+  
+  .categories-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    
+    ion-chip {
+      background-color: #f8f8f8;
+      color: #026cdf; // Ticketmaster blue
+    }
+  }
+  
+  .ticket-info {
+    margin-top: 1.5rem;
+    
+    ion-button {
+      --background: #026cdf; // Ticketmaster blue
+      font-weight: bold;
+    }
+  }
+}

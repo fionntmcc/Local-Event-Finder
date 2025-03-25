@@ -1,0 +1,70 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="/tabs/events"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Event Details</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <div *ngIf="loading" class="loading-container">
+        <ion-spinner></ion-spinner>
+        <p>Loading event details...</p>
+    </div>
+
+
+    <div *ngIf="error" class="error-container">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <p>Unable to load event details. Please try again later.</p>
+    </div>
+
+    <div *ngIf="!loading && !error && event" class="event-container">
+        <!-- Ticketmaster uses a different data structure -->
+        <div class="event-image" *ngIf="event.images && event.images.length">
+            <img [src]="event.images[0].url" [alt]="event.name">
+        </div>
+
+        <div class="event-details">
+            <h1>{{ event.name }}</h1>
+
+            <div class="event-meta">
+                <div class="meta-item">
+                    <ion-icon name="calendar-outline"></ion-icon>
+                    <span>{{ event.dates?.start?.localDate | date:'EEEE, MMMM d, y' }}</span>
+                </div>
+                <div class="meta-item">
+                    <ion-icon name="time-outline"></ion-icon>
+                    <span>{{ event.dates?.start?.localTime | date:'h:mm a' }}</span>
+                </div>
+                <div class="meta-item" *ngIf="event._embedded?.venues && event._embedded?.venues.length">
+                    <ion-icon name="location-outline"></ion-icon>
+                    <span>{{ event._embedded.venues[0].name }}</span>
+                </div>
+            </div>
+
+            <div class="event-description" *ngIf="event.info">
+                <h2>About</h2>
+                <p>{{ event.info }}</p>
+            </div>
+
+            <div class="event-categories" *ngIf="event.classifications && event.classifications.length">
+                <h2>Categories</h2>
+                <div class="categories-list">
+                    <ion-chip *ngIf="event.classifications[0].segment?.name">{{ event.classifications[0].segment.name
+                        }}</ion-chip>
+                    <ion-chip *ngIf="event.classifications[0].genre?.name">{{ event.classifications[0].genre.name
+                        }}</ion-chip>
+                    <ion-chip *ngIf="event.classifications[0].subGenre?.name">{{ event.classifications[0].subGenre.name
+                        }}</ion-chip>
+                </div>
+            </div>
+
+            <div class="ticket-info" *ngIf="event.url">
+                <a [href]="event.url" target="_blank" class="buy-tickets-btn">
+                    <ion-button expand="block" color="primary">Buy Tickets</ion-button>
+                </a>
+            </div>
+        </div>
+    </div>
+</ion-content>

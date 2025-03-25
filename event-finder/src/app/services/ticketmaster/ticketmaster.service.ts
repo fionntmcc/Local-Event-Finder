@@ -67,4 +67,13 @@ export class TicketmasterService {
     
     return this.httpClient.get<TicketmasterResult>(url);
   }
+  
+  // Get a specific event by its ID
+  getEventById(eventId: string): Observable<any> {
+    // Change to the correct Ticketmaster event details endpoint format
+    const url = `${API_URL}/events/${eventId}?apikey=${API_KEY}`;
+    
+    console.log('Making API request to:', url);
+    return this.httpClient.get(url);
+  }
 }
