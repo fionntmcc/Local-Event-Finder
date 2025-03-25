@@ -20,7 +20,6 @@ import {
   IonSpinner,
   IonRefresher,
   IonRefresherContent,
-  IonIcon,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, NgStyle } from '@angular/common';
@@ -74,7 +73,6 @@ declare global {
     IonItem,
     IonRefresher,
     IonRefresherContent,
-    IonIcon,
   ],
 })
 
