@@ -20,7 +20,7 @@
 
   <div *ngIf="!loading && !error && event" class="event-container">
     <ion-card class="event-image-card">
-      <img *ngIf="event?.images && event.images.length" [src]="event.images[0]?.url || ''"
+      <img class="event-image" *ngIf="event?.images && event.images.length" [src]="event.images[0]?.url || ''"
         [alt]="event?.name || 'Event image'">
       <ion-card-header>
         <ion-card-title>{{ event?.name }}</ion-card-title>
