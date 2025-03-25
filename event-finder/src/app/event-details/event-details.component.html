@@ -69,5 +69,14 @@
         </ion-button>
       </a>
     </div>
+
+    <div class="map-link" *ngIf="event._embedded.venues[0].location">
+      <a [href]="'https://www.google.com/maps?q=' + event._embedded.venues[0].location.latitude + ',' + event._embedded.venues[0].location.longitude" target="_blank">
+        <ion-button expand="block" color="secondary">
+          Get Directions
+        </ion-button>
+      </a>
+    </div>
+
   </div>
 </ion-content>
