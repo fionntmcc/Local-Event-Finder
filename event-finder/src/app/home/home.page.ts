@@ -24,6 +24,8 @@ import {
   IonSearchbar,
   IonSpinner,
   IonBadge,
+  IonRefresher,
+  IonRefresherContent,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, NgStyle, TitleCasePipe } from '@angular/common';
@@ -82,6 +84,8 @@ declare global {
     IonListHeader,
     IonItem,
     IonBadge,
+    IonRefresher,
+    IonRefresherContent,
   ],
 })
 
@@ -386,22 +390,13 @@ export class HomePage implements OnInit {
     const latitude = this.locationService.getLatitude();
     const longitude = this.locationService.getLongitude();
 
-    // Build list of active category filters
-    let currentActiveCategories: string[] = [];
-    this.activeCategories.forEach((active, index) => {
-      if (active) {
-        currentActiveCategories.push(this.categories[index]);
-      }
-    });
-    console.log('Current active categories:', currentActiveCategories);
-
     // Create options object for Ticketmaster API
     const ticketmasterOptions = {
       lat: latitude,
       long: longitude,
       keyword: this.searchTerm || undefined,
       radius: 200, // Default radius in miles
-      eventType: currentActiveCategories.length > 0 ? currentActiveCategories.join(',') : undefined
+      eventType: this.getActiveEventTypes()
     };
 
     // Call the Ticketmaster API
@@ -769,5 +764,75 @@ export class HomePage implements OnInit {
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in km
+  }
+
+  // Handle pull-to-refresh functionality
+  handleRefresh(event: any) {
+    console.log('Begin refresh operation');
+    
+    // Reset state
+    this.events = [];
+    this.currentPage = 1;
+    this.hasMorePages = true;
+    
+    // Load fresh data
+    this.ticketmasterService.getEvents(
+      this.currentPage, 
+      {
+        lat: this.locationService.getLatitude(),
+        long: this.locationService.getLongitude(),
+        keyword: this.searchTerm || undefined,
+        radius: 200,
+        eventType: this.getActiveEventTypes()
+      }
+    ).pipe(
+      finalize(() => {
+        // Complete the refresh operation when data is loaded
+        event.target.complete();
+        this.isLoading = false;
+      }),
+      catchError((e) => {
+        console.log(e);
+        this.error = e.error ? e.error.message || 'Unknown error' : 'Error loading events';
+        return [];
+      })
+    )
+    .subscribe({
+      next: (res) => {
+        console.log('Refreshed Ticketmaster events:', res);
+
+        if (res && res._embedded && res._embedded.events) {
+          this.events = res._embedded.events;
+          
+          // Apply sorting if needed
+          if (this.currentSortMethod !== 'none') {
+            this.sortAndUpdateEvents();
+          }
+          
+          // Update map markers
+          this.addEventMarkersToMap();
+          
+          // Update pagination state
+          if (res.page && res.page.totalPages > res.page.number) {
+            this.hasMorePages = true;
+          } else {
+            this.hasMorePages = false;
+          }
+        } else {
+          this.hasMorePages = false;
+        }
+      },
+    });
+  }
+
+  // Helper method to get active event types
+  private getActiveEventTypes(): string | undefined {
+    let currentActiveCategories: string[] = [];
+    this.activeCategories.forEach((active, index) => {
+      if (active) {
+        currentActiveCategories.push(this.categories[index]);
+      }
+    });
+    return currentActiveCategories.length > 0 ? currentActiveCategories.join(',') : undefined;
   }
 }
