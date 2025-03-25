@@ -134,11 +134,15 @@ export class HomePage implements OnInit {
   public showDragHelpToast: boolean = true;
 
   // Sorting functionality
-  public currentSortMethod: string = 'alphabetical'; // Options: 'none', 'alphabetical', 'date', 'category'
+  public currentSortMethod: string = 'alphabetical'; // Options: 'alphabetical', 'date', 'location'
 
   // Map error handling
   public mapLoadError: boolean = false;
   public mapLoadErrorMessage: string = '';
+
+  // Image loading tracking
+  private loadedImages: Map<string, boolean> = new Map();
+  private imageErrors: Map<string, boolean> = new Map();
 
   constructor() {
     // Set up the callback for Google Maps
@@ -218,7 +222,7 @@ export class HomePage implements OnInit {
 
     // Initialize all categories as inactive (no filters)
     this.activeCategories = this.categories.map(() => false);
-    this.currentSortMethod = 'none'; // Reset sort method
+    this.currentSortMethod = 'date'; // Reset sort method
 
     // Update user location, then load events
     this.locationService.refreshLocation()
@@ -428,10 +432,8 @@ export class HomePage implements OnInit {
           // Add new events to our list
           this.events.push(...res._embedded.events);
 
-          // Apply sorting if a sort method is active
-          if (this.currentSortMethod !== 'none') {
-            this.sortAndUpdateEvents();
-          }
+          // Sort events based on active sort type
+          this.sortAndUpdateEvents();
 
           // Add markers to map for new events
           this.addEventMarkersToMap();
@@ -805,7 +807,7 @@ export class HomePage implements OnInit {
           this.events = res._embedded.events;
           
           // Apply sorting if needed
-          if (this.currentSortMethod !== 'none') {
+          if (this.currentSortMethod !== 'date') {
             this.sortAndUpdateEvents();
           }
           
@@ -834,5 +836,47 @@ export class HomePage implements OnInit {
       }
     });
     return currentActiveCategories.length > 0 ? currentActiveCategories.join(',') : undefined;
+  }
+
+  // Get a suitable image URL for an event
+  getEventImage(event: any): string {
+    if (!event || !event.images || !event.images.length) {
+      // Return a default placeholder image if no images are available
+      return 'assets/placeholder-event.jpg';
+    }
+    
+    // First try to find a thumbnail image (smallest suitable image)
+    const thumbnail = event.images.find((img: any) => 
+      img.width < 200 && img.ratio === '4_3' || img.ratio === '16_9');
+    
+    if (thumbnail) {
+      return thumbnail.url;
+    }
+    
+    // If no thumbnail, try to find a small image
+    const smallImage = event.images.find((img: any) => img.width < 500);
+    
+    if (smallImage) {
+      return smallImage.url;
+    }
+    
+    // If all else fails, just use the first image
+    return event.images[0].url;
+  }
+  
+  // Track which images have loaded successfully
+  onImageLoad(event: any): void {
+    this.loadedImages.set(event.id, true);
+  }
+  
+  // Track which images have failed to load
+  onImageError(event: any): void {
+    this.imageErrors.set(event.id, true);
+    this.loadedImages.set(event.id, true); // Mark as "loaded" so spinner goes away
+  }
+  
+  // Check if an image has loaded
+  isImageLoaded(event: any): boolean {
+    return this.loadedImages.get(event.id) === true;
   }
 }

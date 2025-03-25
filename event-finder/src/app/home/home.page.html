@@ -94,9 +94,10 @@
   </div>
 
   <ion-item class="search-container">
+    <ion-label>Listings</ion-label>
     <!-- Add sort button -->
-    <ion-button slot="end" class="sort-btn" id="sort-btn" fill="clear">
-      Sort
+    <ion-button slot="end" class="sort-btn" id="sort-btn">
+      Sort by : {{ currentSortMethod }}
     </ion-button>
   </ion-item>
 
@@ -122,6 +123,12 @@
   <!-- Display filtered events if search is active, otherwise display all events -->
   <ion-list *ngIf="events.length > 0">
     <ion-item *ngFor="let event of events" class="event-item" [routerLink]="['/event', event.id]">
+      <div slot="start" class="event-image-container">
+        <img [src]="getEventImage(event)" class="event-thumbnail" alt="Event image" 
+             [ngStyle]="{'visibility': isImageLoaded(event) ? 'visible' : 'hidden'}"
+             (load)="onImageLoad(event)" (error)="onImageError(event)">
+        <ion-spinner *ngIf="!isImageLoaded(event)" name="crescent"></ion-spinner>
+      </div>
       <ion-label>
         <h2>{{ event.name }}</h2>
         <p>{{ event.dates?.start?.dateTime ? formatDate(event.dates.start.dateTime) :
