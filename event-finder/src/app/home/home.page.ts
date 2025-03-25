@@ -1,27 +1,27 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterLinkWithHref } from '@angular/router';
 import {
-  IonList, 
-  IonHeader, 
-  IonToolbar, 
-  IonTitle, 
-  IonContent, 
-  IonText, 
-  IonCard, 
-  IonCardHeader, IonCardTitle, 
+  IonList,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonText,
+  IonCard,
+  IonCardHeader, IonCardTitle,
   IonCardContent,
-  IonButton, 
-  IonPopover, 
-  InfiniteScrollCustomEvent, 
-  IonInfiniteScroll, 
+  IonButton,
+  IonPopover,
+  InfiniteScrollCustomEvent,
+  IonInfiniteScroll,
   IonInfiniteScrollContent,
   IonChip,
   IonLabel,
   IonListHeader,
   IonItem,
   IonCheckbox,
-  IonIcon, 
-  IonSearchbar, 
+  IonIcon,
+  IonSearchbar,
   IonSpinner,
   IonBadge,
 } from '@ionic/angular/standalone';
@@ -35,6 +35,7 @@ import { LocationService } from '../services/location/location.service';
 import { StorageService } from '../services/storage.service';
 import { Router } from '@angular/router';
 import { EventCategory } from '../services/predict-hq/event-category';
+import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
 
 // Tell TypeScript about Google Maps global variables
 declare global {
@@ -89,6 +90,9 @@ export class HomePage implements OnInit {
   private storageService = inject(StorageService);
   private router = inject(Router);
 
+  // Test ticketmaster api
+  private ticketmasterService = inject(TicketmasterService);
+
   // Core variables for app functionality
   private currentPage: number = 1;
   public events: Event[] = [];
@@ -108,6 +112,8 @@ export class HomePage implements OnInit {
   public locationAvailable: boolean = false;
   private mapInitialized = false;
   private markers: any[] = [];
+
+  private ticketmasterEvents: any = [];
 
   // Search functionality
   public searchTerm: string = '';
@@ -160,14 +166,14 @@ export class HomePage implements OnInit {
       script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyA_hp1omiThAyvMfBxpdThM57Rl_JCyYek&loading=async&callback=initMap`;
       script.async = true;
       script.defer = true;
-      
+
       // Handle script loading errors
       script.onerror = () => {
         console.error('Failed to load Google Maps API');
         this.mapLoadError = true;
         this.mapLoadErrorMessage = 'Unable to load Google Maps. If you are using an ad blocker, please disable it for this site.';
       };
-      
+
       // Set a timeout to catch silent failures
       const timeoutId = setTimeout(() => {
         if (!window.google || !window.google.maps) {
@@ -176,13 +182,13 @@ export class HomePage implements OnInit {
           this.mapLoadErrorMessage = 'Unable to load Google Maps. If you are using an ad blocker, please disable it for this site.';
         }
       }, 10000); // 10 second timeout
-      
+
       // Clear timeout if maps loads successfully
       window.initMap = () => {
         clearTimeout(timeoutId);
         this.initializeMap();
       };
-      
+
       document.body.appendChild(script);
     }
   }
@@ -198,12 +204,12 @@ export class HomePage implements OnInit {
     this.value = "";
     this.isHelpOpen = false;
     this.isLoading = true;
-    
+
     // Get all available event categories
     this.categories = Object.keys(EventCategory).filter((item) => {
       return isNaN(parseInt(item));
     });
-    
+
     // Initialize all categories as inactive (no filters)
     this.activeCategories = this.categories.map(() => false);
     this.currentSortMethod = 'none'; // Reset sort method
@@ -280,7 +286,7 @@ export class HomePage implements OnInit {
 
         // Add markers for all currently loaded events
         this.addEventMarkersToMap();
-        
+
         // Reset error state if map loads successfully
         this.mapLoadError = false;
         this.mapLoadErrorMessage = '';
@@ -379,13 +385,19 @@ export class HomePage implements OnInit {
     const longitude = this.locationService.getLongitude();
 
     // Build list of active category filters
-    let currentActiveCategories : string[] = [];
+    let currentActiveCategories: string[] = [];
     this.activeCategories.forEach((active, index) => {
       if (active) {
-        currentActiveCategories.push(this.categories[index]); 
+        currentActiveCategories.push(this.categories[index]);
       }
     });
-    console.log('Current active categories:', currentActiveCategories); 
+    console.log('Current active categories:', currentActiveCategories);
+
+    this.ticketmasterService.getEvents().subscribe((res) => {
+      console.log("Ticketmaster events");
+      console.log(res);
+      this.ticketmasterEvents = res;
+    });
 
     // Call the API with all our parameters
     this.predictHqService.getEvents(this.currentPage, latitude, longitude, this.searchTerm, currentActiveCategories).pipe(
@@ -403,38 +415,38 @@ export class HomePage implements OnInit {
         return [];
       })
     )
-      // Subscribe to get the results
-      .subscribe({
-        next: (res) => {
-          // Log the response for debugging
-          console.log(res);
-          
-          // Add new events to our list
-          this.events.push(...res.results);
-          
-          // Apply sorting if a sort method is active
-          if (this.currentSortMethod !== 'none') {
-            this.sortAndUpdateEvents();
-          }
-          
-          console.log(this.events);
-          
-          // Add markers to map for new events
-          this.addEventMarkersToMap();
+        // Subscribe to get the results
+        .subscribe({
+          next: (res) => {
+            // Log the response for debugging
+            console.log(res);
 
-          // Check if we've reached the last page of results
-          if (res.next) {
-            this.hasMorePages = true;
-          } else {
-            this.hasMorePages = false;
-          }
+            // Add new events to our list
+            this.events.push(...res.results);
 
-          // Update infinite scroll component state
-          if (scroll) {
-            scroll.target.disabled = !this.hasMorePages;
-          }
-        },
-      });
+            // Apply sorting if a sort method is active
+            if (this.currentSortMethod !== 'none') {
+              this.sortAndUpdateEvents();
+            }
+
+            console.log(this.events);
+
+            // Add markers to map for new events
+            this.addEventMarkersToMap();
+
+            // Check if we've reached the last page of results
+            if (res.next) {
+              this.hasMorePages = true;
+            } else {
+              this.hasMorePages = false;
+            }
+
+            // Update infinite scroll component state
+            if (scroll) {
+              scroll.target.disabled = !this.hasMorePages;
+            }
+          },
+        });
   }
 
   // Load the next page of events when user scrolls to bottom
@@ -540,7 +552,7 @@ export class HomePage implements OnInit {
             <p style="margin: 4px 0; font-size: 14px;"><strong>${this.formatDate(event.start_local)}</strong></p>
             <p style="margin: 4px 0; font-size: 14px; color: #666;"><ion-icon name="location"></ionicon> ${this.getDistance(event.location[1], event.location[0])} away</p>
             <p style="margin: 6px 0; font-size: 13px; line-height: 1.3; max-height: 60px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-              ${ event.description.length == 26 ? "No description" : event.description.replace('Sourced from predicthq.com - ', '')}
+              ${event.description.length == 26 ? "No description" : event.description.replace('Sourced from predicthq.com - ', '')}
             </p>
             <button id="view-details-${event.id}" style="background-color: #3880ff; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 8px;">
               View Details
@@ -679,11 +691,11 @@ export class HomePage implements OnInit {
           // Skip events without location
           if (!a.location || a.location.length < 2) return 1;
           if (!b.location || b.location.length < 2) return -1;
-          
+
           // Calculate distances
           const distA = this.calculateDistanceInKm(a.location[1], a.location[0]);
           const distB = this.calculateDistanceInKm(b.location[1], b.location[0]);
-          
+
           // Sort by distance (ascending - closest first)
           return distA - distB;
         });
@@ -698,18 +710,18 @@ export class HomePage implements OnInit {
   private calculateDistanceInKm(eventLat: number, eventLng: number): number {
     const userLat = this.locationService.getLatitude();
     const userLng = this.locationService.getLongitude();
-    
+
     // Use Haversine formula to calculate distance on a sphere
     const R = 6371; // Earth's radius in km
     const dLat = this.toRad(eventLat - userLat);
     const dLng = this.toRad(eventLng - userLng);
-    
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(this.toRad(userLat)) * Math.cos(this.toRad(eventLat)) * 
-      Math.sin(dLng/2) * Math.sin(dLng/2);
-    
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRad(userLat)) * Math.cos(this.toRad(eventLat)) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in km
   }
 }
