@@ -53,13 +53,15 @@
       <ion-list lines="none">
         <ion-item *ngFor="let event of events" class="event-item">
           <ion-card class="event-card">
-            
+
             <!-- Event image : ensure that first image is wider than 320 px, else use image 2 -->
             <div class="event-image-container">
               @if (event.images && event.images.length > 0 && event.images[0].width > 320) {
-              <img [src]="event.images[0].url" [alt]="event.name + ' image'">
+              <img class="event-image" [src]="event.images[0].url" [alt]="event.name + ' image'">
               } @else if (event.images && event.images.length > 1) {
-              <img [src]="event.images[1].url" [alt]="event.name + ' image'">
+              <img class="event-image" [src]="event.images[1].url" [alt]="event.name + ' image'">
+              } @else {
+              <img class="event-image" src="assets/placeholder-event.jpg" [alt]="event.name + ' image'">
               }
             </div>
             
