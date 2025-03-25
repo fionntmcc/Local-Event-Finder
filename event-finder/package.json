@@ -11,9 +11,6 @@
     "test": "ng test",
     "lint": "ng lint"
   },
-  "engines": {
-    "npm": ">=6.0.0"
-  },
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.0.0",
@@ -36,6 +33,7 @@
     "@ionic/angular": "^8.0.0",
     "@ionic/storage": "^4.0.0",
     "@ionic/storage-angular": "^4.0.0",
+    "angular": "^1.8.3",
     "cordova-plugin-geolocation": "^5.0.0",
     "firebase": "^11.5.0",
     "google-maps": "^4.3.3",
