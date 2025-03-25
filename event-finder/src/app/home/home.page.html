@@ -24,11 +24,6 @@
       <ion-button class="category-filter-btn" id="category-filter-btn" fill="clear">
         Filter
       </ion-button>
-
-      <!-- Add sort button -->
-      <ion-button class="sort-btn" id="sort-btn" fill="clear">
-        Sort
-      </ion-button>
     </div>
 
     <ion-chip *ngIf="searchTerm" (click)="clearSearch()" color="medium">
@@ -75,9 +70,9 @@
           </ion-item>
           <ion-item button (click)="sortEvents('date')">
             <ion-label>Date (Soonest First)</ion-label>
-            <ion-item button (click)="sortEvents('distance')">
-              <ion-label>Distance (Closest First)</ion-label>
-            </ion-item>
+          </ion-item>
+          <ion-item button (click)="sortEvents('distance')">
+            <ion-label>Distance (Closest First)</ion-label>
           </ion-item>
         </ion-list>
       </ion-content>
@@ -97,6 +92,13 @@
       </ion-text>
     </div>
   </div>
+
+  <ion-item class="search-container">
+    <!-- Add sort button -->
+    <ion-button slot="end" class="sort-btn" id="sort-btn" fill="clear">
+      Sort
+    </ion-button>
+  </ion-item>
 
   <div *ngIf="events.length === 0 && !error && !isLoading" class="ion-text-center ion-padding">
     <ion-text>
