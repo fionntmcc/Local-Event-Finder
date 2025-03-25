@@ -1,111 +1,79 @@
-<ion-header [translucent]="true">
+<ion-header #eventHeader tabindex="-1">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/events">
-        <svg slot="icon-only" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 12H5"></path>
-          <path d="M12 19l-7-7 7-7"></path>
-        </svg>
-      </ion-back-button>
+      <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
     <ion-title>Event Details</ion-title>
-    <ion-toggle slot="end" [(ngModel)]="eventStatus" (ionChange)="toggleEventStatus()"></ion-toggle>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <!-- Main Event Card -->
-  <ion-list *ngIf="event" class="event-list">
-    <!-- Event Header with Date Display -->
-    <ion-item>
-      <ion-label>
-        <h2>{{ event.title }}</h2>
-      </ion-label>
-      <ion-badge slot="end" color="primary" *ngIf="event.category">{{ event.category }}</ion-badge>
-    </ion-item>
-    <ion-item>
-      <ion-label>
-        <h3>Date & Time</h3>
-        <p> {{ event.start | date: 'fullDate' }} at {{ event.start | date: 'shortTime' }}</p>
-      </ion-label>
-    </ion-item>
+<ion-content>
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner></ion-spinner>
+    <p>Loading event details...</p>
+  </div>
 
-    <!-- Event Image if Available -->
-    <ion-item *ngIf="event.image">
-      <ion-img [src]="event.image" alt="{{ event.title }}"></ion-img>
-    </ion-item>
+  <div *ngIf="error" class="error-container">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>Unable to load event details. Please try again later.</p>
+  </div>
 
-    <!-- Location Information -->
-    <ion-item *ngIf="event.location">
-      <ion-label>
-        <h3>Location</h3>
-        <p>{{ event.place || event.venue }}</p>
-        <p>{{ event.address }}</p>
-        <p>{{ event.country }}</p>
-      </ion-label>
-    </ion-item>
+  <div *ngIf="!loading && !error && event" class="event-container">
+    <ion-card class="event-image-card">
+      <img *ngIf="event?.images && event.images.length" [src]="event.images[0]?.url || ''"
+        [alt]="event?.name || 'Event image'">
+      <ion-card-header>
+        <ion-card-title>{{ event?.name }}</ion-card-title>
+      </ion-card-header>
+    </ion-card>
 
-    <!-- Description Section -->
-    <ion-item *ngIf="event.description">
-      <ion-label>
-        <h3>About This Event</h3>
-        <p>{{ event.description.length == 26 ? "No description" : event.description.replace("Sourced from predicthq.com - ", "") }}</p>
-      </ion-label>
-    </ion-item>
+    <ion-list lines="none" class="event-details-list">
 
-    <!-- Tags/Labels -->
-    <ion-item *ngIf="event.labels && event.labels.length > 0">
-      <ion-label>
-        <h3>Tags</h3>
-        <div class="tags-container">
-          <ion-badge *ngFor="let label of event.labels" class="tag" color="light">
-            {{ label }}
-          </ion-badge>
-        </div>
-      </ion-label>
-    </ion-item>
+      <ion-item>
+        <ion-icon name="calendar-outline" slot="start"></ion-icon>
+        <ion-label>Date & Time</ion-label>
+        <ion-note slot="end">{{ event.dates.start.localDate && event.dates.start.localTime ? event.dates.start.localDate
+          + " @ " + event.dates.start.localTime : "Date unavailable" }}</ion-note>
+      </ion-item>
 
-    @if (event.state) {
-    <ion-item>
-      <ion-label>
-        <h3>Status</h3>
-        <div class="tags-container">
-          <ion-badge class="tag" [color]="event.state === 'active' ? 'success' : 'medium'">
-            {{ event.state }}
-          </ion-badge>
-        </div>
-      </ion-label>
-    </ion-item>
+      <ion-item>
+        <ion-icon name="location-outline" slot="start"></ion-icon>
+        <ion-label>Location</ion-label>
+        <ion-note slot="end">{{ event._embedded.venues[0].name && event._embedded.venues[0].state.name ? event._embedded.venues[0].name + ", " + event._embedded.venues[0].state.name : "Date Unavailable"
+          }}</ion-note>
+      </ion-item>
 
-    <ion-item>
-      <ion-label>
-        <h3>First Listed</h3>
-        <p>{{ event.first_seen | date: 'mediumDate' }}</p>
-      </ion-label>
-    </ion-item>
-    }
+      <ion-item>
+        <ion-icon name="pricetag-outline" slot="start"></ion-icon>
+        <ion-label>Price Range</ion-label>
+        <ion-note slot="end">{{ event.priceRanges[0].min ? "$" + event.priceRanges[0].min : "Price unavailable" }}
+          - {{ event.priceRanges[0].max ? "$" + event.priceRanges[0].max : "Price unavailable" }}</ion-note>
+      </ion-item>
 
-    <!-- Loading State -->
-    <div *ngIf="!event" class="loading-container">
-      <ion-spinner name="circular"></ion-spinner>
-      <p>Loading event details...</p>
+      <ion-item>
+        <ion-icon name="people-outline" slot="start"></ion-icon>
+        <ion-label>Age Restrictions</ion-label>
+        <ion-note slot="end">{{ event?.info ? event.info : "No age restrictions" }}</ion-note>
+      </ion-item>
+
+      <ion-item>
+        <ion-icon name="musical-notes-outline" slot="start"></ion-icon>
+        <ion-label>Genre</ion-label>
+        <ion-note slot="end">{{ event.classifications[0].genre.name ? event.classifications[0].genre.name : "Genre
+          unavailable" }}</ion-note>
+      </ion-item>
+
+      
+
+    </ion-list>
+
+    <div class="ticket-info" *ngIf="event?.url">
+      <a [href]="event?.url" target="_blank" class="buy-tickets-btn">
+        <ion-button expand="block" color="primary">
+          <ion-icon name="ticket-outline" slot="start"></ion-icon>
+          Buy Tickets
+        </ion-button>
+      </a>
     </div>
-
-    <!-- Action Buttons -->
-    @if (event.url) {
-    <ion-button expand="block" *ngIf="event.url" (click)="openEventWebsite()" color="primary">
-      <ion-icon name="globe-outline" slot="start"></ion-icon>
-      Visit Website
-    </ion-button>
-    }
-    <ion-button expand="block" *ngIf="event.location" (click)="getDirections()" color="secondary">
-      <ion-icon name="navigate-outline" slot="start"></ion-icon>
-      Get Directions
-    </ion-button>
-    <ion-button expand="block" (click)="shareEvent()" color="secondary">
-      <ion-icon name="navigate-outline" slot="start"></ion-icon>
-      Share
-    </ion-button>
-  </ion-list>
+  </div>
 </ion-content>
