@@ -30,15 +30,12 @@ import {
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf, NgStyle, TitleCasePipe } from '@angular/common';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
-import { PredictHqService } from '../services/predict-hq/predict-hq.service'
 import { finalize, catchError } from 'rxjs';
-import { Event } from '../services/predict-hq/interfaces';
 import { LocationService } from '../services/location/location.service';
 import { StorageService } from '../services/storage.service';
 import { Router } from '@angular/router';
 import { EventCategory } from '../services/predict-hq/event-category';
 import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
-import { ApiResult } from '../services/predict-hq/interfaces';
 import { TicketmasterResult } from '../services/ticketmaster/interfaces';
 
 // Tell TypeScript about Google Maps global variables
@@ -91,7 +88,6 @@ declare global {
 
 export class HomePage implements OnInit {
   // Use dependency injection for services
-  private predictHqService = inject(PredictHqService);
   private locationService = inject(LocationService);
   private storageService = inject(StorageService);
   private router = inject(Router);
@@ -134,7 +130,7 @@ export class HomePage implements OnInit {
   public showDragHelpToast: boolean = true;
 
   // Sorting functionality
-  public currentSortMethod: string = 'alphabetical'; // Options: 'alphabetical', 'date', 'location'
+  public currentSortMethod: string = 'distance'; // Options: 'alphabetical', 'date', 'location'
 
   // Map error handling
   public mapLoadError: boolean = false;
@@ -222,7 +218,7 @@ export class HomePage implements OnInit {
 
     // Initialize all categories as inactive (no filters)
     this.activeCategories = this.categories.map(() => false);
-    this.currentSortMethod = 'date'; // Reset sort method
+    this.currentSortMethod = 'distance'; // Reset sort method
 
     // Update user location, then load events
     this.locationService.refreshLocation()

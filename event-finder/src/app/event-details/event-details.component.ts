@@ -2,7 +2,8 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
 import { Event } from '../services/ticketmaster/interfaces';
-import { CommonModule, DatePipe } from '@angular/common'; // Add CommonModule and DatePipe
+import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // Add this import
 import {
   IonContent,
   IonIcon,
@@ -22,6 +23,7 @@ import {
   IonSpinner,
   IonTitle,
   IonNote,
+  IonToggle,
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -29,8 +31,9 @@ import {
   templateUrl: './event-details.component.html',
   styleUrls: ['./event-details.component.scss'],
   imports: [
-    CommonModule, // Add CommonModule for NgIf and other directives
-    DatePipe, // Add DatePipe for date formatting
+    CommonModule,
+    DatePipe,
+    FormsModule, // Add FormsModule to the imports array
     IonContent,
     IonIcon,
     IonLabel,
@@ -41,7 +44,7 @@ import {
     IonHeader,
     IonToolbar,
     IonButtons,
-    IonBackButton, // Add missing component
+    IonBackButton,
     IonChip,
     IonItem,
     IonListHeader,
@@ -49,29 +52,34 @@ import {
     IonSpinner,
     IonTitle,
     IonNote,
+    IonToggle,
   ],
-  standalone: true, // Make sure this component is standalone
+  standalone: true,
 })
-export class EventDetailsPage implements OnInit {
+export class EventDetailsPage {
   @ViewChild('eventHeader', { static: false }) eventHeader?: ElementRef;
   event: Event | null = null;
   loading = true;
   error = false;
+  eventStatus: boolean = false;
+  eventIds: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private ticketmasterService: TicketmasterService
   ) { }
 
-  ngOnInit() {
-    console.log('EventDetailsPage ngOnInit');
-    this.loadEventDetails();
-  }
 
   // Add Ionic lifecycle hook for when view enters
-  ionViewDidEnter() {
+  ionViewWillEnter() {
     // Set focus to main content element to prevent focus from staying in hidden elements
     this.setFocusToMainElement();
+    this.eventIds = (localStorage.getItem('events') || '').split(',').filter((id: string) => id !== '');
+    console.log('Event ids:');
+    console.log(this.eventIds);
+    
+    // Call loadEventDetails to fetch the event data
+    this.loadEventDetails();
   }
 
   // Method to set focus to first focusable element in the component
@@ -89,6 +97,23 @@ export class EventDetailsPage implements OnInit {
     }, 150); // Small delay to ensure elements are rendered
   }
 
+  toggleEventStatus() {
+    console.log('Toggling event status :', this.eventStatus);
+    // Implement event status toggle
+
+    // Update the event status in the local storage
+    if (this.event) {
+      if (this.eventStatus) {
+        this.eventIds.push(this.event.id);
+      } else {
+        this.eventIds = this.eventIds.filter((id) => id !== this.event?.id);
+      }
+
+      localStorage.setItem('events', this.eventIds.join(','));
+    }
+  }
+
+
   loadEventDetails() {
     this.loading = true;
     this.error = false;
@@ -103,14 +128,15 @@ export class EventDetailsPage implements OnInit {
 
     this.ticketmasterService.getEventById(eventId).subscribe({
       next: (response: Event) => {
-        // The event data might be in a different structure
-        console.log('Raw API response:', response);
 
         // Ticketmaster API often returns the data in a nested structure
         // Try this instead of direct assignment:
         if (response) {
           this.event = response;
           console.log('Event details set to:', this.event);
+          
+          // Set the eventStatus based on whether this event ID is in the saved events
+          this.eventStatus = this.eventIds.includes(this.event.id);
         } else {
           console.error('No event data in the response');
           this.error = true;

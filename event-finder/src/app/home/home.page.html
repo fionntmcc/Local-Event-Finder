@@ -21,9 +21,9 @@
         placeholder="Search events, categories or places" animated debounce="300" show-clear-button="always">
       </ion-searchbar>
 
-      <ion-button class="category-filter-btn" id="category-filter-btn" fill="clear">
+      <!-- <ion-button class="category-filter-btn" id="category-filter-btn" fill="clear">
         Filter
-      </ion-button>
+      </ion-button> -->
     </div>
 
     <ion-chip *ngIf="searchTerm" (click)="clearSearch()" color="medium">
@@ -36,8 +36,8 @@
       <ion-icon name="close-circle" (click)="resetSorting()"></ion-icon>
     </ion-chip> -->
   </div>
-
-  <!-- Category Filter Popover -->
+  
+  <!-- 
   <ion-popover trigger="category-filter-btn" [dismissOnSelect]="false" side="bottom">
     <ng-template>
       <ion-content>
@@ -56,8 +56,9 @@
       </ion-content>
     </ng-template>
   </ion-popover>
+  -->
 
-  <!-- Sort Order Popover -->
+  <!-- Sort button with popover -->
   <ion-popover trigger="sort-btn" [dismissOnSelect]="true" side="bottom">
     <ng-template>
       <ion-content>
@@ -65,14 +66,14 @@
           <ion-list-header>
             <ion-label>Sort Events By</ion-label>
           </ion-list-header>
-          <ion-item button (click)="sortEvents('alphabetical')">
-            <ion-label>Alphabetical (A-Z)</ion-label>
+          <ion-item button (click)="sortEvents('distance')">
+            <ion-label>Distance</ion-label>
           </ion-item>
           <ion-item button (click)="sortEvents('date')">
-            <ion-label>Date (Soonest First)</ion-label>
+            <ion-label>Date</ion-label>
           </ion-item>
-          <ion-item button (click)="sortEvents('distance')">
-            <ion-label>Distance (Closest First)</ion-label>
+          <ion-item button (click)="sortEvents('alphabetical')">
+            <ion-label>Alphabetical</ion-label>
           </ion-item>
         </ion-list>
       </ion-content>
@@ -124,9 +125,9 @@
   <ion-list *ngIf="events.length > 0">
     <ion-item *ngFor="let event of events" class="event-item" [routerLink]="['/event', event.id]">
       <div slot="start" class="event-image-container">
-        <img [src]="getEventImage(event)" class="event-thumbnail" alt="Event image" 
-             [ngStyle]="{'visibility': isImageLoaded(event) ? 'visible' : 'hidden'}"
-             (load)="onImageLoad(event)" (error)="onImageError(event)">
+        <img [src]="getEventImage(event)" class="event-thumbnail" alt="Event image"
+          [ngStyle]="{'visibility': isImageLoaded(event) ? 'visible' : 'hidden'}" (load)="onImageLoad(event)"
+          (error)="onImageError(event)">
         <ion-spinner *ngIf="!isImageLoaded(event)" name="crescent"></ion-spinner>
       </div>
       <ion-label>

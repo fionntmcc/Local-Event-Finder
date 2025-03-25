@@ -32,13 +32,6 @@ export class TicketmasterService {
   ): Observable<TicketmasterResult> {
     let url = `${API_URL}?apikey=${API_KEY}`;
     
-    // Add country code (default to US if not provided and no lat/long)
-    if (options?.countryCode) {
-      url += `&countryCode=${options.countryCode}`;
-    } else if (!options?.lat || !options?.long) {
-      url += '&countryCode=US';
-    }
-    
     // Add optional parameters if provided
     if (options) {
       if (options.lat && options.long) {
@@ -65,6 +58,9 @@ export class TicketmasterService {
     // Add page parameter
     url += `&page=${page}`;
     
+    // debug
+    //console.log('Making API request to:', url);
+
     return this.httpClient.get<TicketmasterResult>(url);
   }
   

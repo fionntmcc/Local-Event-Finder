@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
@@ -17,7 +17,8 @@ import {
   IonIcon,
   IonSpinner,
 } from '@ionic/angular/standalone';
-import { PredictHqService } from '../services/predict-hq/predict-hq.service';
+
+import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
 import { LocalNotifications } from '@capacitor/local-notifications';
 
 @Component({
@@ -45,14 +46,17 @@ import { LocalNotifications } from '@capacitor/local-notifications';
 })
 export class UpcomingEventsPage {
 
-  predictHqService = new PredictHqService();
+  ticketmasterService = new TicketmasterService();
   notificationsEnabled = false;
 
   constructor() { }
 
   // Store user's saved events
-  public upcomingEvents: any[] = [];
+  public events: any[] = [];
   public eventIds: string[] = [];
+  public loading = true;
+  public error = false;
+
 
   // Runs every time the page becomes active
   ionViewWillEnter() {
@@ -60,22 +64,30 @@ export class UpcomingEventsPage {
     this.eventIds = (localStorage.getItem('events') || "").split(",").filter((id: string) => id !== "");
     console.log("Event ids:");
     console.log(this.eventIds);
-    this.upcomingEvents = [];
+    this.events = [];
 
     // Fetch details for each saved event
     this.eventIds.forEach((id: string) => {
-      this.predictHqService.getEventById(id).subscribe((event: any) => {
-        if (event?.results?.[0]) {
-          const eventData = event.results[0];
-          // Skip events without a start date (shouldn't happen, but just in case)
-          if (eventData.start) {
-            this.upcomingEvents.push(eventData);
-            this.scheduleNotification(eventData);
-          } else {
-            console.warn(`Event with ID ${id} has no start date, skipping`);
-          }
-        }
-      });
+      console.log("Fetching event with ID: " + id);
+      this.ticketmasterService.getEventById(id).subscribe({
+            next: (response: any) => {
+      
+              // Ticketmaster API often returns the data in a nested structure
+              // Try this instead of direct assignment:
+              if (response) {
+                this.events.push(response);
+              } else {
+                console.error('No event data in the response');
+                this.error = true;
+              }
+              this.loading = false;
+            },
+            error: (err) => {
+              console.error('Error fetching event details:', err);
+              this.error = true;
+              this.loading = false;
+            }
+          });
     });
   }
 
@@ -135,7 +147,7 @@ export class UpcomingEventsPage {
     console.log("Removing event with ID: " + eventId);
     this.eventIds = this.eventIds.filter((id: string) => id !== eventId);
     localStorage.setItem('events', this.eventIds.join(","));
-    this.upcomingEvents = this.upcomingEvents.filter((event: any) => event.id !== eventId);
+    this.events = this.events.filter((event: any) => event.id !== eventId);
 
     // Cancel notification when event is removed
     if (this.notificationsEnabled) {

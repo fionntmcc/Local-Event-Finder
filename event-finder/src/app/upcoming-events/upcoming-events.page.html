@@ -9,7 +9,7 @@
 <ion-content [fullscreen]="true">
   <div class="events-container">
 
-    @if (upcomingEvents.length == 0) {
+    @if (events.length == 0) {
     @if (eventIds.length == 0) {
     <div class="empty-state">
       <ion-icon name="calendar"></ion-icon>
@@ -25,37 +25,64 @@
     } @else {
     <ng-container>
       <ion-list lines="none">
-        <ion-item *ngFor="let event of upcomingEvents" class="event-item">
+        <ion-item *ngFor="let event of events" class="event-item">
           <ion-card class="event-card">
-            <!-- 
-            <div class="event-image-container"
-              [ngStyle]="{'background-image': 'url(' + (event.image || 'assets/event-placeholder.jpg') + ')'}">
-            </div> 
-            -->
+            <!-- Event image -->
+            <div class="event-image-container" *ngIf="event.images && event.images.length">
+              <img [src]="event.images[0].url" [alt]="event.name + ' image'">
+            </div>
+            
             <ion-card-header>
               <div class="category-container">
-                <div class="event-date-badge">
-                  <div class="date-month">{{ event.start ? (event.start.slice(5,7) | date:'MMM') : 'TBD' }}</div>
-                  <div class="date-day">{{ event.start ? event.start.slice(8,10) : '--' }}</div>
+                <div class="event-date-badge" *ngIf="event.dates?.start?.localDate">
+                  <div class="date-month">{{ event.dates.start.localDate | date:'MMM' }}</div>
+                  <div class="date-day">{{ event.dates.start.localDate | date:'dd' }}</div>
                 </div>
-                <ion-badge color="primary" *ngIf="event.category">{{ event.category }}</ion-badge>
-                <ion-badge color="tertiary" *ngIf="event.labels?.length">{{ event.labels[0] }}</ion-badge>
+                <ion-badge color="primary" *ngIf="event.classifications && event.classifications[0]?.segment?.name">
+                  {{ event.classifications[0].segment.name }}
+                </ion-badge>
+                <ion-badge color="tertiary" *ngIf="event.classifications && event.classifications[0]?.genre?.name">
+                  {{ event.classifications[0].genre.name }}
+                </ion-badge>
               </div>
-              <ion-card-title class="event-title">{{ event.title }}</ion-card-title>
+              <ion-card-title class="event-title">{{ event.name }}</ion-card-title>
             </ion-card-header>
+            
             <ion-card-content>
               <div class="event-details">
-                <div class="event-detail">
+                <!-- Date and Time -->
+                <div class="event-detail" *ngIf="event.dates?.start?.localDate">
                   <ion-icon name="calendar-outline"></ion-icon>
-                  <span>{{ event.start ? (event.start | date:'E, MMM d, y • h:mm a') : 'Date not available' }}</span>
+                  <span>{{ event.dates.start.localDate | date:'E, MMM d, y' }}
+                    <ng-container *ngIf="event.dates.start.localTime">
+                      • {{ event.dates.start.localTime | date:'h:mm a' }}
+                    </ng-container>
+                  </span>
                 </div>
-                <div class="event-detail" *ngIf="event.description">
+                
+                <!-- Venue -->
+                <div class="event-detail" *ngIf="event._embedded?.venues && event._embedded.venues.length">
+                  <ion-icon name="location-outline"></ion-icon>
+                  <span>{{ event._embedded.venues[0].name }}
+                    <ng-container *ngIf="event._embedded.venues[0].city?.name">
+                      , {{ event._embedded.venues[0].city.name }}
+                    </ng-container>
+                  </span>
+                </div>
+                
+                <!-- Price Range -->
+                <div class="event-detail" *ngIf="event.priceRanges && event.priceRanges.length">
+                  <ion-icon name="pricetag-outline"></ion-icon>
+                  <span>{{ event.priceRanges[0].min | currency }} - {{ event.priceRanges[0].max | currency }}</span>
+                </div>
+                
+                <!-- Info -->
+                <div class="event-detail" *ngIf="event.info">
                   <ion-icon name="information-circle-outline"></ion-icon>
-                  <span class="description">{{ event.description.length == 26 ? "No description" :
-                    event.description.replace('Sourced from predicthq.com - ', '') }}{{ event.description.length > 100 ?
-                    '...' : '' }}</span>
+                  <span class="description">{{ event.info.length > 100 ? event.info.substring(0, 100) + '...' : event.info }}</span>
                 </div>
               </div>
+              
               <div class="event-actions">
                 <ion-button (click)="shareEvent(event)" fill="clear" size="small">
                   <ion-icon slot="start" name="share-social-outline"></ion-icon>

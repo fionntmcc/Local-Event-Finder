@@ -4,6 +4,7 @@
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
     <ion-title>Event Details</ion-title>
+    <ion-toggle slot="end" [(ngModel)]="eventStatus" (ionChange)="toggleEventStatus()" name="statusToggle"></ion-toggle>
   </ion-toolbar>
 </ion-header>
 
@@ -62,9 +63,6 @@
         <ion-note slot="end">{{ event.classifications[0].genre.name ? event.classifications[0].genre.name : "Genre
           unavailable" }}</ion-note>
       </ion-item>
-
-      
-
     </ion-list>
 
     <div class="ticket-info" *ngIf="event?.url">
