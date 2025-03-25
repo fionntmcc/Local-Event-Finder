@@ -7,9 +7,6 @@ import {
   IonTitle,
   IonContent,
   IonText,
-  IonCard,
-  IonCardHeader, IonCardTitle,
-  IonCardContent,
   IonButton,
   IonPopover,
   InfiniteScrollCustomEvent,
@@ -19,17 +16,14 @@ import {
   IonLabel,
   IonListHeader,
   IonItem,
-  IonCheckbox,
-  IonIcon,
   IonSearchbar,
   IonSpinner,
-  IonBadge,
   IonRefresher,
   IonRefresherContent,
+  IonIcon,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
-import { NgFor, NgIf, NgStyle, TitleCasePipe } from '@angular/common';
-import { ExploreContainerComponent } from '../explore-container/explore-container.component';
+import { NgFor, NgIf, NgStyle } from '@angular/common';
 import { finalize, catchError } from 'rxjs';
 import { LocationService } from '../services/location/location.service';
 import { StorageService } from '../services/storage.service';
@@ -37,6 +31,13 @@ import { Router } from '@angular/router';
 import { EventCategory } from '../services/predict-hq/event-category';
 import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
 import { TicketmasterResult } from '../services/ticketmaster/interfaces';
+import { 
+  locationOutline, 
+  closeCircle, 
+  chevronDownCircleOutline, 
+  calendarOutline,
+  timeOutline
+} from 'ionicons/icons';
 
 // Tell TypeScript about Google Maps global variables
 declare global {
@@ -57,32 +58,24 @@ declare global {
     IonTitle,
     IonContent,
     IonText,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    ExploreContainerComponent,
     IonInfiniteScroll,
     IonInfiniteScrollContent,
     IonButton,
     IonPopover,
     IonChip,
     IonLabel,
-    IonIcon,
     NgFor,
     NgIf,
     NgStyle,
-    TitleCasePipe,
     IonSearchbar,
     IonSpinner,
     FormsModule,
-    IonCheckbox,
     RouterLinkWithHref,
     IonListHeader,
     IonItem,
-    IonBadge,
     IonRefresher,
     IonRefresherContent,
+    IonIcon,
   ],
 })
 
@@ -141,6 +134,7 @@ export class HomePage implements OnInit {
   private imageErrors: Map<string, boolean> = new Map();
 
   constructor() {
+
     // Set up the callback for Google Maps
     window.initMap = () => {
       this.initializeMap();
@@ -567,7 +561,7 @@ export class HomePage implements OnInit {
             <div style="color: black; max-width: 250px; overflow: hidden;">
               <h6 style="margin: 8px 0; font-size: 16px; font-weight: 600;">${event.name}</h6>
               <p style="margin: 4px 0; font-size: 14px;"><strong>${this.formatDate(event.dates.start.dateTime || event.dates.start.localDate)}</strong></p>
-              <p style="margin: 4px 0; font-size: 14px; color: #666;"><ion-icon name="location"></ionicon> ${venue.name}</p>
+              <p style="margin: 4px 0; font-size: 14px; color: #666;"><ion-icon name="location-outline"></ion-icon> ${venue.name}</p>
               <p style="margin: 6px 0; font-size: 13px; line-height: 1.3; max-height: 60px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
                 ${event.info || event.pleaseNote || 'No description available'}
               </p>

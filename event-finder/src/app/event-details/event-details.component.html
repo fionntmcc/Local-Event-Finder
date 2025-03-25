@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
-    <ion-title>Event Details</ion-title>
+    <ion-title>Details</ion-title>
     <ion-toggle class="status-toggle" slot="end" [(ngModel)]="eventStatus" (ionChange)="toggleEventStatus()">I'm interested</ion-toggle>
   </ion-toolbar>
 </ion-header>
@@ -27,7 +27,7 @@
         <img class="event-image" [src]="event.images[1].url" [alt]="event.name + ' image'">
         }
       <ion-card-header>
-        <ion-card-title>{{ event?.name }}</ion-card-title>
+        <ion-card-title>{{ event.name }}</ion-card-title>
       </ion-card-header>
     </ion-card>
 
@@ -57,7 +57,7 @@
       <ion-item>
         <ion-icon name="people-outline" slot="start"></ion-icon>
         <ion-label>Age Restrictions</ion-label>
-        <ion-note slot="end">{{ event?.info ? event.info : "No age restrictions" }}</ion-note>
+        <ion-note slot="end">{{ event.info ? event.info : "No age restrictions" }}</ion-note>
       </ion-item>
 
       <ion-item>
@@ -68,8 +68,8 @@
       </ion-item>
     </ion-list>
 
-    <div class="ticket-info" *ngIf="event?.url">
-      <a [href]="event?.url" target="_blank" class="buy-tickets-btn">
+    <div class="ticket-info" *ngIf="event.url">
+      <a [href]="event.url" target="_blank" class="buy-tickets-btn">
         <ion-button expand="block" color="primary">
           <ion-icon name="ticket-outline" slot="start"></ion-icon>
           Buy Tickets

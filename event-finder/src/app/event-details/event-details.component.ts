@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
 import { Event } from '../services/ticketmaster/interfaces';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Add this import
 import {
   IonContent,
@@ -16,9 +16,7 @@ import {
   IonToolbar,
   IonButtons,
   IonBackButton,
-  IonChip,
   IonItem,
-  IonListHeader,
   IonList,
   IonSpinner,
   IonTitle,
@@ -32,7 +30,6 @@ import {
   styleUrls: ['./event-details.component.scss'],
   imports: [
     CommonModule,
-    DatePipe,
     FormsModule, // Add FormsModule to the imports array
     IonContent,
     IonIcon,
@@ -45,9 +42,7 @@ import {
     IonToolbar,
     IonButtons,
     IonBackButton,
-    IonChip,
     IonItem,
-    IonListHeader,
     IonList,
     IonSpinner,
     IonTitle,

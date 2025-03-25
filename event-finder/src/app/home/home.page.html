@@ -28,6 +28,7 @@
 
     <ion-chip *ngIf="searchTerm" (click)="clearSearch()" color="medium">
       <ion-label>Clear</ion-label>
+      <ion-icon name="close-circle"></ion-icon>
     </ion-chip>
 
     <!-- Display current sort order -->
@@ -36,7 +37,7 @@
       <ion-icon name="close-circle" (click)="resetSorting()"></ion-icon>
     </ion-chip> -->
   </div>
-  
+
   <!-- 
   <ion-popover trigger="category-filter-btn" [dismissOnSelect]="false" side="bottom">
     <ng-template>
@@ -67,12 +68,15 @@
             <ion-label>Sort Events By</ion-label>
           </ion-list-header>
           <ion-item button (click)="sortEvents('distance')">
+            <ion-icon name="location-outline" slot="start"></ion-icon>
             <ion-label>Distance</ion-label>
           </ion-item>
           <ion-item button (click)="sortEvents('date')">
+            <ion-icon name="calendar-outline" slot="start"></ion-icon>
             <ion-label>Date</ion-label>
           </ion-item>
           <ion-item button (click)="sortEvents('alphabetical')">
+            <ion-icon name="text-outline" slot="start"></ion-icon>
             <ion-label>Alphabetical</ion-label>
           </ion-item>
         </ion-list>
@@ -99,6 +103,7 @@
     <!-- Add sort button -->
     <ion-button slot="end" class="sort-btn" id="sort-btn">
       Sort by : {{ currentSortMethod }}
+      <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
     </ion-button>
   </ion-item>
 

@@ -9,7 +9,6 @@ import {
   IonContent, 
   IonToggle,
  } from '@ionic/angular/standalone';
-import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -21,7 +20,6 @@ import { FormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     FormsModule,
-    ExploreContainerComponent,
     IonHeader, 
     IonToolbar, 
     IonTitle, 
