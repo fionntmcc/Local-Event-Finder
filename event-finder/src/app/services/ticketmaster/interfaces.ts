@@ -1,4 +1,4 @@
-export interface ApiResult {
+export interface TicketmasterResult {
   _embedded: Embedded2;
   _links: Links3;
   page: Page;

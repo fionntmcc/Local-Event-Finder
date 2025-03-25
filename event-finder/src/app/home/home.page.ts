@@ -36,6 +36,8 @@ import { StorageService } from '../services/storage.service';
 import { Router } from '@angular/router';
 import { EventCategory } from '../services/predict-hq/event-category';
 import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
+import { ApiResult } from '../services/predict-hq/interfaces';
+import { TicketmasterResult } from '../services/ticketmaster/interfaces';
 
 // Tell TypeScript about Google Maps global variables
 declare global {
@@ -113,7 +115,7 @@ export class HomePage implements OnInit {
   private mapInitialized = false;
   private markers: any[] = [];
 
-  private ticketmasterEvents: any = [];
+  private ticketmasterEvents: any[] = [];
 
   // Search functionality
   public searchTerm: string = '';
@@ -396,7 +398,9 @@ export class HomePage implements OnInit {
     this.ticketmasterService.getEvents().subscribe((res) => {
       console.log("Ticketmaster events");
       console.log(res);
-      this.ticketmasterEvents = res;
+      this.ticketmasterEvents = res._embedded.events;
+      console.log("Arrayval");
+      console.log(this.ticketmasterEvents);
     });
 
     // Call the API with all our parameters
