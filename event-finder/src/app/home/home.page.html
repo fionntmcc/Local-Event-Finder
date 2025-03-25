@@ -9,7 +9,7 @@
 <ion-content [fullscreen]="true">
   <!-- Add the ion-refresher at the top of your content -->
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
-    <ion-refresher-content pullingIcon="chevron-down-circle-outline" pullingText="Pull to refresh"
+    <ion-refresher-content pullingText="Pull to refresh"
       refreshingSpinner="circles" refreshingText="Refreshing events...">
     </ion-refresher-content>
   </ion-refresher>
@@ -24,7 +24,6 @@
 
     <ion-chip *ngIf="searchTerm" (click)="clearSearch()" color="medium">
       <ion-label>Clear</ion-label>
-      <ion-icon name="close-circle"></ion-icon>
     </ion-chip>
   </div>
 
@@ -37,15 +36,12 @@
             <ion-label>Sort Events By</ion-label>
           </ion-list-header>
           <ion-item button (click)="sortEvents('distance')">
-            <ion-icon name="location-outline" slot="start"></ion-icon>
             <ion-label>Distance</ion-label>
           </ion-item>
           <ion-item button (click)="sortEvents('date')">
-            <ion-icon name="calendar-outline" slot="start"></ion-icon>
             <ion-label>Date</ion-label>
           </ion-item>
           <ion-item button (click)="sortEvents('alphabetical')">
-            <ion-icon name="text-outline" slot="start"></ion-icon>
             <ion-label>Alphabetical</ion-label>
           </ion-item>
         </ion-list>
@@ -72,7 +68,6 @@
     <!-- Add sort button -->
     <ion-button slot="end" class="sort-btn" id="sort-btn">
       Sort by : {{ currentSortMethod }}
-      <ion-icon name="chevron-down-outline" slot="end"></ion-icon>
     </ion-button>
   </ion-item>
 

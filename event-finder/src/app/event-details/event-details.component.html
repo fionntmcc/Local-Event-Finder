@@ -15,7 +15,6 @@
   </div>
 
   <div *ngIf="error" class="error-container">
-    <ion-icon name="alert-circle-outline"></ion-icon>
     <p>Unable to load event details. Please try again later.</p>
   </div>
 
@@ -34,34 +33,29 @@
     <ion-list lines="none" class="event-details-list">
 
       <ion-item>
-        <ion-icon name="calendar-outline" slot="start"></ion-icon>
         <ion-label>Date & Time</ion-label>
         <ion-note slot="end">{{ event.dates.start.localDate && event.dates.start.localTime ? event.dates.start.localDate
           + " @ " + event.dates.start.localTime : "Date unavailable" }}</ion-note>
       </ion-item>
 
       <ion-item>
-        <ion-icon name="location-outline" slot="start"></ion-icon>
         <ion-label>Location</ion-label>
         <ion-note slot="end">{{ event._embedded.venues[0].name && event._embedded.venues[0].state.name ? event._embedded.venues[0].name + ", " + event._embedded.venues[0].state.name : "Date Unavailable"
           }}</ion-note>
       </ion-item>
 
       <ion-item>
-        <ion-icon name="pricetag-outline" slot="start"></ion-icon>
         <ion-label>Price Range</ion-label>
         <ion-note slot="end">{{ event.priceRanges[0].min ? "$" + event.priceRanges[0].min : "Price unavailable" }}
           - {{ event.priceRanges[0].max ? "$" + event.priceRanges[0].max : "Price unavailable" }}</ion-note>
       </ion-item>
 
       <ion-item>
-        <ion-icon name="people-outline" slot="start"></ion-icon>
         <ion-label>Age Restrictions</ion-label>
         <ion-note slot="end">{{ event.info ? event.info : "No age restrictions" }}</ion-note>
       </ion-item>
 
       <ion-item>
-        <ion-icon name="musical-notes-outline" slot="start"></ion-icon>
         <ion-label>Genre</ion-label>
         <ion-note slot="end">{{ event.classifications[0].genre.name ? event.classifications[0].genre.name : "Genre
           unavailable" }}</ion-note>
@@ -71,7 +65,6 @@
     <div class="ticket-info" *ngIf="event.url">
       <a [href]="event.url" target="_blank" class="buy-tickets-btn">
         <ion-button expand="block" color="primary">
-          <ion-icon name="ticket-outline" slot="start"></ion-icon>
           Buy Tickets
         </ion-button>
       </a>

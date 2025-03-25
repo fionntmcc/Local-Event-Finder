@@ -6,7 +6,6 @@
     <!-- Add sort button in the toolbar -->
     <ion-buttons slot="end">
       <ion-button id="sort-btn">
-        <ion-icon slot="start" name="funnel-outline"></ion-icon>
         Sort
       </ion-button>
     </ion-buttons>
@@ -38,7 +37,6 @@
     @if (events.length == 0) {
     @if (eventIds.length == 0) {
     <div class="empty-state">
-      <ion-icon name="calendar"></ion-icon>
       <h2>No upcoming events</h2>
       <p>Your saved events will appear here</p>
       <ion-button routerLink="/tabs/home">Discover Events</ion-button>
@@ -85,7 +83,6 @@
               <div class="event-details">
                 <!-- Date and Time -->
                 <div class="event-detail" *ngIf="event.dates?.start?.localDate">
-                  <ion-icon name="calendar-outline"></ion-icon>
                   <span>{{ event.dates.start.localDate | date:'E, MMM d, y' }}
                     <ng-container *ngIf="event.dates.start.localTime">
                       • {{ event.dates.start.localTime | date:'h:mm a' }}
@@ -95,7 +92,6 @@
                 
                 <!-- Venue -->
                 <div class="event-detail" *ngIf="event._embedded?.venues && event._embedded.venues.length">
-                  <ion-icon name="location-outline"></ion-icon>
                   <span>{{ event._embedded.venues[0].name }}
                     <ng-container *ngIf="event._embedded.venues[0].city?.name">
                       , {{ event._embedded.venues[0].city.name }}
@@ -105,28 +101,23 @@
                 
                 <!-- Price Range -->
                 <div class="event-detail" *ngIf="event.priceRanges && event.priceRanges.length">
-                  <ion-icon name="pricetag-outline"></ion-icon>
                   <span>{{ event.priceRanges[0].min | currency }} - {{ event.priceRanges[0].max | currency }}</span>
                 </div>
                 
                 <!-- Info -->
                 <div class="event-detail" *ngIf="event.info">
-                  <ion-icon name="information-circle-outline"></ion-icon>
                   <span class="description">{{ event.info.length > 100 ? event.info.substring(0, 100) + '...' : event.info }}</span>
                 </div>
               </div>
               
               <div class="event-actions">
                 <ion-button (click)="shareEvent(event)" fill="clear" size="small">
-                  <ion-icon slot="start" name="share-social-outline"></ion-icon>
                   Share
                 </ion-button>
                 <ion-button (click)="removeEvent(event.id)" fill="clear" size="small">
-                  <ion-icon slot="start" name="trash-outline"></ion-icon>
                   Remove
                 </ion-button>
                 <ion-button [routerLink]="['/event', event.id]" fill="clear" size="small">
-                  <ion-icon slot="start" name="open-outline"></ion-icon>
                   View
                 </ion-button>
               </div>

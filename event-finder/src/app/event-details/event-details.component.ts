@@ -6,7 +6,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Add this import
 import {
   IonContent,
-  IonIcon,
   IonLabel,
   IonButton,
   IonCard,
@@ -32,7 +31,6 @@ import {
     CommonModule,
     FormsModule, // Add FormsModule to the imports array
     IonContent,
-    IonIcon,
     IonLabel,
     IonButton,
     IonCard,

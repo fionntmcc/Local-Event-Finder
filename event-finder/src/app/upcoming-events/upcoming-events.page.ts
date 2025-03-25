@@ -14,14 +14,12 @@ import {
   IonButton,
   IonItem,
   IonBadge,
-  IonIcon,
   IonSpinner,
   IonPopover,
   IonButtons,
   IonLabel,
   IonListHeader,
 } from '@ionic/angular/standalone';
-
 import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
 import { LocalNotifications } from '@capacitor/local-notifications';
 
@@ -44,7 +42,6 @@ import { LocalNotifications } from '@capacitor/local-notifications';
     IonButton,
     IonItem,
     IonBadge,
-    IonIcon,
     IonSpinner,
     IonPopover,
     IonButtons, 
