@@ -68,9 +68,7 @@ export class EventDetailsPage {
     // Set focus to main content element to prevent focus from staying in hidden elements
     this.setFocusToMainElement();
     this.eventIds = (localStorage.getItem('events') || '').split(',').filter((id: string) => id !== '');
-    console.log('Event ids:');
-    console.log(this.eventIds);
-    
+
     // Call loadEventDetails to fetch the event data
     this.loadEventDetails();
   }
@@ -91,8 +89,6 @@ export class EventDetailsPage {
   }
 
   toggleEventStatus() {
-    console.log('Toggling event status :', this.eventStatus);
-    // Implement event status toggle
 
     // Update the event status in the local storage
     if (this.event) {
@@ -106,13 +102,11 @@ export class EventDetailsPage {
     }
   }
 
-
   loadEventDetails() {
     this.loading = true;
     this.error = false;
 
     const eventId = this.route.snapshot.paramMap.get('id');
-    console.log('Event ID:', eventId);
     if (!eventId) {
       this.error = true;
       this.loading = false;
@@ -126,7 +120,6 @@ export class EventDetailsPage {
         // Try this instead of direct assignment:
         if (response) {
           this.event = response;
-          console.log('Event details set to:', this.event);
           
           // Set the eventStatus based on whether this event ID is in the saved events
           this.eventStatus = this.eventIds.includes(this.event.id);
@@ -142,5 +135,22 @@ export class EventDetailsPage {
         this.loading = false;
       }
     });
+  }
+
+  // Open native share dialog to share event with friends
+  shareEvent(event: any) {
+    if (!event) return;
+
+    const title = event.title;
+    const url = event.url || `https://event-finder-123.firebaseapp.com/event/${event.id}`;
+    const text = `Check out this event: ${title} - ${url}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title,
+        text,
+        url
+      });
+    }
   }
 }

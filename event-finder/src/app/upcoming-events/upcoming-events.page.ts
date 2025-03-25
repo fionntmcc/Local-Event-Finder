@@ -79,13 +79,10 @@ export class UpcomingEventsPage {
   ionViewWillEnter() {
     // Get saved event IDs from local storage
     this.eventIds = (localStorage.getItem('events') || "").split(",").filter((id: string) => id !== "");
-    console.log("Event ids:");
-    console.log(this.eventIds);
     this.events = [];
 
     // Fetch details for each saved event
     this.eventIds.forEach((id: string) => {
-      console.log("Fetching event with ID: " + id);
       this.ticketmasterService.getEventById(id).subscribe({
             next: (response: any) => {
       
@@ -178,7 +175,6 @@ export class UpcomingEventsPage {
             extra: { eventId: event.id }
           }]
         });
-        console.log(`Notification scheduled for event ${event.id} on ${notificationTime}`);
       } catch (error) {
         console.error('Error scheduling notification:', error);
       }
@@ -187,11 +183,10 @@ export class UpcomingEventsPage {
 
   // Open native share dialog to share event with friends
   shareEvent(event: any) {
-    console.log("Sharing event with ID: " + event.id);
     if (!event) return;
 
     const title = event.title;
-    const url = event.url || `https://event-finder.com/event/${event.id}`;
+    const url = event.url || `https://event-finder-123.firebaseapp.com/event/${event.id}`;
     const text = `Check out this event: ${title} - ${url}`;
 
     if (navigator.share) {
@@ -205,7 +200,6 @@ export class UpcomingEventsPage {
 
   // Remove event from saved list and cancel its notification
   async removeEvent(eventId: string) {
-    console.log("Removing event with ID: " + eventId);
     this.eventIds = this.eventIds.filter((id: string) => id !== eventId);
     localStorage.setItem('events', this.eventIds.join(","));
     this.events = this.events.filter((event: any) => event.id !== eventId);
@@ -215,7 +209,6 @@ export class UpcomingEventsPage {
       try {
         const notificationId = parseInt(eventId.replace(/\D/g, '').substring(0, 8) || '1');
         await LocalNotifications.cancel({ notifications: [{ id: notificationId }] });
-        console.log(`Cancelled notification for event ${eventId}`);
       } catch (error) {
         console.error('Error cancelling notification:', error);
       }

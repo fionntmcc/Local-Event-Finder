@@ -28,14 +28,6 @@ import { LocationService } from '../services/location/location.service';
 import { StorageService } from '../services/storage.service';
 import { Router } from '@angular/router';
 import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
-import { TicketmasterResult } from '../services/ticketmaster/interfaces';
-import { 
-  locationOutline, 
-  closeCircle, 
-  chevronDownCircleOutline, 
-  calendarOutline,
-  timeOutline
-} from 'ionicons/icons';
 
 // Tell TypeScript about Google Maps global variables
 declare global {
@@ -102,8 +94,6 @@ export class HomePage implements OnInit {
   public locationAvailable: boolean = false;
   private mapInitialized = false;
   private markers: any[] = [];
-
-  private ticketmasterEvents: any[] = [];
 
   // Search functionality
   public searchTerm: string = '';
@@ -394,7 +384,7 @@ export class HomePage implements OnInit {
       }),
       // Handle errors from the API
       catchError((e) => {
-        console.log(e);
+        console.error(e);
         this.error = e.error ? e.error.message || 'Unknown error' : 'Error loading events';
         return [];
       })
@@ -402,7 +392,6 @@ export class HomePage implements OnInit {
     .subscribe({
       next: (res) => {
         // Log the response for debugging
-        console.log('Ticketmaster events:', res);
 
         // Process and add events from Ticketmaster
         if (res && res._embedded && res._embedded.events) {
@@ -503,7 +492,6 @@ export class HomePage implements OnInit {
     this.events = []; // Clear current events
     this.currentPage = 1; // Reset to first page
     this.hasMorePages = true; // Reset pagination state
-    console.log('Searching for:', this.searchTerm);
 
     // Load events matching the search term
     this.loadEvents();
@@ -722,7 +710,6 @@ export class HomePage implements OnInit {
 
   // Handle pull-to-refresh functionality
   handleRefresh(event: any) {
-    console.log('Begin refresh operation');
     
     // Reset state
     this.events = [];
@@ -745,15 +732,13 @@ export class HomePage implements OnInit {
         this.isLoading = false;
       }),
       catchError((e) => {
-        console.log(e);
+        console.error(e);
         this.error = e.error ? e.error.message || 'Unknown error' : 'Error loading events';
         return [];
       })
     )
     .subscribe({
       next: (res) => {
-        console.log('Refreshed Ticketmaster events:', res);
-
         if (res && res._embedded && res._embedded.events) {
           this.events = res._embedded.events;
           

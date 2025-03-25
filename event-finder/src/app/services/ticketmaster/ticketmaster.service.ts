@@ -69,7 +69,6 @@ export class TicketmasterService {
     // Change to the correct Ticketmaster event details endpoint format
     const url = `https://app.ticketmaster.com/discovery/v2/events/${eventId}?apikey=${API_KEY}`;
     
-    console.log('Making API request to:', url);
     return this.httpClient.get<Event>(url);
   }
 }
