@@ -16,6 +16,10 @@ import {
   IonBadge,
   IonIcon,
   IonSpinner,
+  IonPopover,
+  IonButtons,
+  IonLabel,
+  IonListHeader,
 } from '@ionic/angular/standalone';
 
 import { TicketmasterService } from '../services/ticketmaster/ticketmaster.service';
@@ -42,12 +46,19 @@ import { LocalNotifications } from '@capacitor/local-notifications';
     IonBadge,
     IonIcon,
     IonSpinner,
+    IonPopover,
+    IonButtons, 
+    IonLabel,
+    IonListHeader,
   ],
 })
 export class UpcomingEventsPage {
 
   ticketmasterService = new TicketmasterService();
   notificationsEnabled = false;
+
+  // Add current sort method property
+  public currentSortMethod: string = 'date';
 
   constructor() { }
 
@@ -76,6 +87,10 @@ export class UpcomingEventsPage {
               // Try this instead of direct assignment:
               if (response) {
                 this.events.push(response);
+                // Sort events after all are loaded
+                if (this.events.length === this.eventIds.length) {
+                  this.sortEvents(this.currentSortMethod);
+                }
               } else {
                 console.error('No event data in the response');
                 this.error = true;
@@ -89,6 +104,46 @@ export class UpcomingEventsPage {
             }
           });
     });
+  }
+
+  // Add sort events method
+  sortEvents(method: string): void {
+    this.currentSortMethod = method;
+    
+    if (!this.events || this.events.length === 0) return;
+    
+    switch (method) {
+      case 'alphabetical':
+        // Sort alphabetically by name
+        this.events.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+        
+      case 'date':
+        // Sort by event date (earliest first)
+        this.events.sort((a, b) => {
+          const dateA = a.dates && a.dates.start ? new Date(a.dates.start.dateTime || a.dates.start.localDate).getTime() : 0;
+          const dateB = b.dates && b.dates.start ? new Date(b.dates.start.dateTime || b.dates.start.localDate).getTime() : 0;
+          return dateA - dateB;
+        });
+        break;
+        
+      case 'venue':
+        // Sort by venue name
+        this.events.sort((a, b) => {
+          const venueA = a._embedded?.venues?.[0]?.name || '';
+          const venueB = b._embedded?.venues?.[0]?.name || '';
+          return venueA.localeCompare(venueB);
+        });
+        break;
+        
+      default:
+        // Default to date sort
+        this.events.sort((a, b) => {
+          const dateA = a.dates && a.dates.start ? new Date(a.dates.start.dateTime || a.dates.start.localDate).getTime() : 0;
+          const dateB = b.dates && b.dates.start ? new Date(b.dates.start.dateTime || b.dates.start.localDate).getTime() : 0;
+          return dateA - dateB;
+        });
+    }
   }
 
   // Set up notifications for events on the day they happen

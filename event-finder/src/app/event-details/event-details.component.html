@@ -4,7 +4,7 @@
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
     <ion-title>Event Details</ion-title>
-    <ion-toggle slot="end" [(ngModel)]="eventStatus" (ionChange)="toggleEventStatus()" name="statusToggle"></ion-toggle>
+    <ion-toggle class="status-toggle" slot="end" [(ngModel)]="eventStatus" (ionChange)="toggleEventStatus()">I'm interested</ion-toggle>
   </ion-toolbar>
 </ion-header>
 
@@ -21,8 +21,11 @@
 
   <div *ngIf="!loading && !error && event" class="event-container">
     <ion-card class="event-image-card">
-      <img class="event-image" *ngIf="event?.images && event.images.length" [src]="event.images[0]?.url || ''"
-        [alt]="event?.name || 'Event image'">
+      @if (event.images && event.images.length > 0 && event.images[0].width > 320) {
+        <img class="event-image" [src]="event.images[0].url" [alt]="event.name + ' image'">
+        } @else if (event.images && event.images.length > 1) {
+        <img class="event-image" [src]="event.images[1].url" [alt]="event.name + ' image'">
+        }
       <ion-card-header>
         <ion-card-title>{{ event?.name }}</ion-card-title>
       </ion-card-header>

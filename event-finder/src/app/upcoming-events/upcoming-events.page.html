@@ -3,7 +3,33 @@
     <ion-title>
       Upcoming Events
     </ion-title>
+    <!-- Add sort button in the toolbar -->
+    <ion-buttons slot="end">
+      <ion-button id="sort-btn">
+        <ion-icon slot="start" name="funnel-outline"></ion-icon>
+        Sort
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
+  
+  <!-- Sort popover -->
+  <ion-popover trigger="sort-btn" [dismissOnSelect]="true" side="bottom">
+    <ng-template>
+      <ion-content>
+        <ion-list lines="full">
+          <ion-list-header>
+            <ion-label>Sort Events By</ion-label>
+          </ion-list-header>
+          <ion-item button (click)="sortEvents('date')">
+            <ion-label>Date</ion-label>
+          </ion-item>
+          <ion-item button (click)="sortEvents('alphabetical')">
+            <ion-label>Alphabetical</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-popover>
 </ion-header>
 
 <ion-content [fullscreen]="true">
@@ -27,9 +53,14 @@
       <ion-list lines="none">
         <ion-item *ngFor="let event of events" class="event-item">
           <ion-card class="event-card">
-            <!-- Event image -->
-            <div class="event-image-container" *ngIf="event.images && event.images.length">
+            
+            <!-- Event image : ensure that first image is wider than 320 px, else use image 2 -->
+            <div class="event-image-container">
+              @if (event.images && event.images.length > 0 && event.images[0].width > 320) {
               <img [src]="event.images[0].url" [alt]="event.name + ' image'">
+              } @else if (event.images && event.images.length > 1) {
+              <img [src]="event.images[1].url" [alt]="event.name + ' image'">
+              }
             </div>
             
             <ion-card-header>

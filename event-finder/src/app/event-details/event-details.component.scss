@@ -149,6 +149,13 @@
   }
 }
 
+.status-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+}
+
 .sort-btn {
   margin-left: 5px;
   font-size: 14px;
