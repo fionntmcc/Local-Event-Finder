@@ -18,7 +18,53 @@ export class TicketmasterService {
   constructor() { }
 
   // return top movies on given page
-  getEvents(page = 1): Observable<TicketmasterResult> {
-    return this.httpClient.get<TicketmasterResult>(`${API_URL}?countryCode=US&apikey=${API_KEY}`);
+  getEvents(
+    page = 1,
+    options?: {
+      lat?: number,
+      long?: number,
+      keyword?: string,
+      date?: string,
+      radius?: number,
+      eventType?: string,
+      countryCode?: string
+    }
+  ): Observable<TicketmasterResult> {
+    let url = `${API_URL}?apikey=${API_KEY}`;
+    
+    // Add country code (default to US if not provided and no lat/long)
+    if (options?.countryCode) {
+      url += `&countryCode=${options.countryCode}`;
+    } else if (!options?.lat || !options?.long) {
+      url += '&countryCode=US';
+    }
+    
+    // Add optional parameters if provided
+    if (options) {
+      if (options.lat && options.long) {
+        url += `&latlong=${options.lat},${options.long}`;
+      }
+      
+      if (options.keyword) {
+        url += `&keyword=${encodeURIComponent(options.keyword)}`;
+      }
+      
+      if (options.date) {
+        url += `&startDateTime=${encodeURIComponent(options.date)}`;
+      }
+      
+      if (options.radius) {
+        url += `&radius=${options.radius}`;
+      }
+      
+      if (options.eventType) {
+        url += `&classificationName=${encodeURIComponent(options.eventType)}`;
+      }
+    }
+    
+    // Add page parameter
+    url += `&page=${page}`;
+    
+    return this.httpClient.get<TicketmasterResult>(url);
   }
 }

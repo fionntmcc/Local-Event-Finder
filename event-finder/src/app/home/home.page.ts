@@ -92,12 +92,12 @@ export class HomePage implements OnInit {
   private storageService = inject(StorageService);
   private router = inject(Router);
 
-  // Test ticketmaster api
+  // Ticketmaster service
   private ticketmasterService = inject(TicketmasterService);
 
   // Core variables for app functionality
   private currentPage: number = 1;
-  public events: Event[] = [];
+  public events: any[] = []; // Changed type to any for Ticketmaster events
   public error = null;
   public id: string = "";
   public value: string = "";
@@ -395,16 +395,20 @@ export class HomePage implements OnInit {
     });
     console.log('Current active categories:', currentActiveCategories);
 
-    this.ticketmasterService.getEvents().subscribe((res) => {
-      console.log("Ticketmaster events");
-      console.log(res);
-      this.ticketmasterEvents = res._embedded.events;
-      console.log("Arrayval");
-      console.log(this.ticketmasterEvents);
-    });
+    // Create options object for Ticketmaster API
+    const ticketmasterOptions = {
+      lat: latitude,
+      long: longitude,
+      keyword: this.searchTerm || undefined,
+      radius: 200, // Default radius in miles
+      eventType: currentActiveCategories.length > 0 ? currentActiveCategories.join(',') : undefined
+    };
 
-    // Call the API with all our parameters
-    this.predictHqService.getEvents(this.currentPage, latitude, longitude, this.searchTerm, currentActiveCategories).pipe(
+    // Call the Ticketmaster API
+    this.ticketmasterService.getEvents(
+      this.currentPage, 
+      ticketmasterOptions
+    ).pipe(
       finalize(() => {
         // Always run this when request completes (success or error)
         this.isLoading = false;
@@ -415,42 +419,44 @@ export class HomePage implements OnInit {
       // Handle errors from the API
       catchError((e) => {
         console.log(e);
-        this.error = e.error.status_message;
+        this.error = e.error ? e.error.message || 'Unknown error' : 'Error loading events';
         return [];
       })
     )
-        // Subscribe to get the results
-        .subscribe({
-          next: (res) => {
-            // Log the response for debugging
-            console.log(res);
+    .subscribe({
+      next: (res) => {
+        // Log the response for debugging
+        console.log('Ticketmaster events:', res);
 
-            // Add new events to our list
-            this.events.push(...res.results);
+        // Process and add events from Ticketmaster
+        if (res && res._embedded && res._embedded.events) {
+          // Add new events to our list
+          this.events.push(...res._embedded.events);
 
-            // Apply sorting if a sort method is active
-            if (this.currentSortMethod !== 'none') {
-              this.sortAndUpdateEvents();
-            }
+          // Apply sorting if a sort method is active
+          if (this.currentSortMethod !== 'none') {
+            this.sortAndUpdateEvents();
+          }
 
-            console.log(this.events);
+          // Add markers to map for new events
+          this.addEventMarkersToMap();
 
-            // Add markers to map for new events
-            this.addEventMarkersToMap();
+          // Check if we've reached the last page of results
+          if (res.page && res.page.totalPages > res.page.number) {
+            this.hasMorePages = true;
+          } else {
+            this.hasMorePages = false;
+          }
+        } else {
+          this.hasMorePages = false;
+        }
 
-            // Check if we've reached the last page of results
-            if (res.next) {
-              this.hasMorePages = true;
-            } else {
-              this.hasMorePages = false;
-            }
-
-            // Update infinite scroll component state
-            if (scroll) {
-              scroll.target.disabled = !this.hasMorePages;
-            }
-          },
-        });
+        // Update infinite scroll component state
+        if (scroll) {
+          scroll.target.disabled = !this.hasMorePages;
+        }
+      },
+    });
   }
 
   // Load the next page of events when user scrolls to bottom
@@ -480,8 +486,16 @@ export class HomePage implements OnInit {
   }
 
   // Calculate distance from user to event
-  getDistance(eventLat: number, eventLng: number): string {
-    return this.locationService.getDistance(eventLat, eventLng);
+  getDistance(event: any): string {
+    if (event._embedded && event._embedded.venues && event._embedded.venues.length > 0) {
+      const venue = event._embedded.venues[0];
+      if (venue.location && venue.location.latitude && venue.location.longitude) {
+        const latitude = parseFloat(venue.location.latitude);
+        const longitude = parseFloat(venue.location.longitude);
+        return this.locationService.getDistance(latitude, longitude);
+      }
+    }
+    return 'Unknown distance';
   }
 
   // Helper for distance calculations
@@ -540,72 +554,82 @@ export class HomePage implements OnInit {
 
     // Add markers for current filtered events
     this.events.forEach(event => {
-      if (event.location && event.location.length >= 2) {
-        const marker = new window.google.maps.Marker({
-          position: { lat: event.location[1], lng: event.location[0] },
-          map: this.map,
-          title: event.title,
-          animation: window.google.maps.Animation.DROP
-        });
+      // Extract location information from Ticketmaster event
+      if (event._embedded && event._embedded.venues && event._embedded.venues.length > 0) {
+        const venue = event._embedded.venues[0];
+        if (venue.location && venue.location.latitude && venue.location.longitude) {
+          const latitude = parseFloat(venue.location.latitude);
+          const longitude = parseFloat(venue.location.longitude);
+          
+          const marker = new window.google.maps.Marker({
+            position: { lat: latitude, lng: longitude },
+            map: this.map,
+            title: event.name,
+            animation: window.google.maps.Animation.DROP
+          });
 
-        // Create an info window with event details
-        const infowindow = new window.google.maps.InfoWindow({
-          content: `
-          <div style="color: black; max-width: 250px; overflow: hidden;">
-            <h6 style="margin: 8px 0; font-size: 16px; font-weight: 600;">${event.title}</h6>
-            <p style="margin: 4px 0; font-size: 14px;"><strong>${this.formatDate(event.start_local)}</strong></p>
-            <p style="margin: 4px 0; font-size: 14px; color: #666;"><ion-icon name="location"></ionicon> ${this.getDistance(event.location[1], event.location[0])} away</p>
-            <p style="margin: 6px 0; font-size: 13px; line-height: 1.3; max-height: 60px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-              ${event.description.length == 26 ? "No description" : event.description.replace('Sourced from predicthq.com - ', '')}
-            </p>
-            <button id="view-details-${event.id}" style="background-color: #3880ff; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 8px;">
-              View Details
-            </button>
-          </div>
-          `,
-          disableAutoPan: false,
-          maxWidth: 270, // Limit max width
-          pixelOffset: new window.google.maps.Size(0, 0)
-        });
+          // Create an info window with event details
+          const infowindow = new window.google.maps.InfoWindow({
+            content: `
+            <div style="color: black; max-width: 250px; overflow: hidden;">
+              <h6 style="margin: 8px 0; font-size: 16px; font-weight: 600;">${event.name}</h6>
+              <p style="margin: 4px 0; font-size: 14px;"><strong>${this.formatDate(event.dates.start.dateTime || event.dates.start.localDate)}</strong></p>
+              <p style="margin: 4px 0; font-size: 14px; color: #666;"><ion-icon name="location"></ionicon> ${venue.name}</p>
+              <p style="margin: 6px 0; font-size: 13px; line-height: 1.3; max-height: 60px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+                ${event.info || event.pleaseNote || 'No description available'}
+              </p>
+              <button id="view-details-${event.id}" style="background-color: #3880ff; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 8px;">
+                View Details
+              </button>
+            </div>
+            `,
+            disableAutoPan: false,
+            maxWidth: 270, // Limit max width
+            pixelOffset: new window.google.maps.Size(0, 0)
+          });
 
-        // Show info window when marker is clicked
-        marker.addListener('click', () => {
-          // Close any other open info windows
-          if (this.openWindow) {
-            this.openWindow.close();
-          }
-          this.openWindow = infowindow;
-          infowindow.open(this.map, marker);
-
-          // Add click event handler for the "View Details" button
-          setTimeout(() => {
-            const detailsBtn = document.getElementById(`view-details-${event.id}`);
-            if (detailsBtn) {
-              detailsBtn.addEventListener('click', () => {
-                this.navigateToEventDetails(event.id);
-              });
+          // Show info window when marker is clicked
+          marker.addListener('click', () => {
+            // Close any other open info windows
+            if (this.openWindow) {
+              this.openWindow.close();
             }
-          }, 300);
-        });
+            this.openWindow = infowindow;
+            infowindow.open(this.map, marker);
 
-        // Close popup if user clicks elsewhere on the map
-        window.google.maps.event.addListener(this.map, 'click', function () {
-          infowindow.close();
-        });
+            // Add click event handler for the "View Details" button
+            setTimeout(() => {
+              const detailsBtn = document.getElementById(`view-details-${event.id}`);
+              if (detailsBtn) {
+                detailsBtn.addEventListener('click', () => {
+                  this.navigateToEventDetails(event.id);
+                });
+              }
+            }, 300);
+          });
 
-        this.markers.push(marker);
+          // Close popup if user clicks elsewhere on the map
+          window.google.maps.event.addListener(this.map, 'click', function () {
+            infowindow.close();
+          });
+
+          this.markers.push(marker);
+        }
       }
     });
 
     // If we're searching and have results, zoom to the first result
-    if (this.searchTerm && this.events.length > 0 &&
-      this.events[0].location &&
-      this.events[0].location.length >= 2) {
-      this.map.setCenter({
-        lat: this.events[0].location[1],
-        lng: this.events[0].location[0]
-      });
-      this.map.setZoom(13);
+    if (this.searchTerm && this.events.length > 0 && 
+        this.events[0]._embedded && this.events[0]._embedded.venues && 
+        this.events[0]._embedded.venues.length > 0) {
+      const venue = this.events[0]._embedded.venues[0];
+      if (venue.location && venue.location.latitude && venue.location.longitude) {
+        this.map.setCenter({
+          lat: parseFloat(venue.location.latitude),
+          lng: parseFloat(venue.location.longitude)
+        });
+        this.map.setZoom(13);
+      }
     }
   }
 
@@ -675,37 +699,55 @@ export class HomePage implements OnInit {
     switch (this.currentSortMethod) {
       case 'alphabetical':
         // Sort alphabetically by title
-        this.events.sort((a, b) => a.title.localeCompare(b.title));
+        this.events.sort((a, b) => a.name.localeCompare(b.name));
         break;
       case 'date':
         // Sort by start date (earliest first)
-        this.events.sort((a, b) => new Date(a.start_local).getTime() - new Date(b.start_local).getTime());
+        this.events.sort((a, b) => {
+          const dateA = a.dates && a.dates.start ? new Date(a.dates.start.dateTime || a.dates.start.localDate).getTime() : 0;
+          const dateB = b.dates && b.dates.start ? new Date(b.dates.start.dateTime || b.dates.start.localDate).getTime() : 0;
+          return dateA - dateB;
+        });
         break;
       case 'category':
-        // Sort by primary category label
-        this.events.sort((a, b) => {
-          const catA = a.labels && a.labels.length > 0 ? a.labels[0] : 'zzz'; // 'zzz' to sort events without category last
-          const catB = b.labels && b.labels.length > 0 ? b.labels[0] : 'zzz';
+        // Sort by primary category
+        /* this.events.sort((a, b) => {
+          const catA = this.getPrimaryCategory(a);
+          const catB = this.getPrimaryCategory(b);
           return catA.localeCompare(catB);
-        });
+        }); */
         break;
       case 'distance':
         // Sort by distance to user (closest first)
         this.events.sort((a, b) => {
-          // Skip events without location
-          if (!a.location || a.location.length < 2) return 1;
-          if (!b.location || b.location.length < 2) return -1;
-
-          // Calculate distances
-          const distA = this.calculateDistanceInKm(a.location[1], a.location[0]);
-          const distB = this.calculateDistanceInKm(b.location[1], b.location[0]);
-
-          // Sort by distance (ascending - closest first)
+          let distA = Number.MAX_VALUE;
+          let distB = Number.MAX_VALUE;
+          
+          if (a._embedded && a._embedded.venues && a._embedded.venues.length > 0) {
+            const venueA = a._embedded.venues[0];
+            if (venueA.location && venueA.location.latitude && venueA.location.longitude) {
+              distA = this.calculateDistanceInKm(
+                parseFloat(venueA.location.latitude),
+                parseFloat(venueA.location.longitude)
+              );
+            }
+          }
+          
+          if (b._embedded && b._embedded.venues && b._embedded.venues.length > 0) {
+            const venueB = b._embedded.venues[0];
+            if (venueB.location && venueB.location.latitude && venueB.location.longitude) {
+              distB = this.calculateDistanceInKm(
+                parseFloat(venueB.location.latitude),
+                parseFloat(venueB.location.longitude)
+              );
+            }
+          }
+          
           return distA - distB;
         });
         break;
       default:
-        // No sorting (keep the order from the API)
+        // No sorting
         break;
     }
   }
