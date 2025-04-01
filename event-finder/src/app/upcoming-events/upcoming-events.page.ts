@@ -44,7 +44,7 @@ import { LocalNotifications } from '@capacitor/local-notifications';
     IonBadge,
     IonSpinner,
     IonPopover,
-    IonButtons, 
+    IonButtons,
     IonLabel,
     IonListHeader,
   ],
@@ -68,7 +68,7 @@ export class UpcomingEventsPage {
   // Add helper method to convert time string to Date object
   convertTimeToDate(timeString: string): Date {
     if (!timeString) return new Date();
-    
+
     const [hours, minutes, seconds] = timeString.split(':').map(Number);
     const date = new Date();
     date.setHours(hours, minutes, seconds);
@@ -84,43 +84,43 @@ export class UpcomingEventsPage {
     // Fetch details for each saved event
     this.eventIds.forEach((id: string) => {
       this.ticketmasterService.getEventById(id).subscribe({
-            next: (response: any) => {
-      
-              // Ticketmaster API often returns the data in a nested structure
-              // Try this instead of direct assignment:
-              if (response) {
-                this.events.push(response);
-                // Sort events after all are loaded
-                if (this.events.length === this.eventIds.length) {
-                  this.sortEvents(this.currentSortMethod);
-                }
-              } else {
-                console.error('No event data in the response');
-                this.error = true;
-              }
-              this.loading = false;
-            },
-            error: (err) => {
-              console.error('Error fetching event details:', err);
-              this.error = true;
-              this.loading = false;
+        next: (response: any) => {
+
+          // Ticketmaster API often returns the data in a nested structure
+          // Try this instead of direct assignment:
+          if (response) {
+            this.events.push(response);
+            // Sort events after all are loaded
+            if (this.events.length === this.eventIds.length) {
+              this.sortEvents(this.currentSortMethod);
             }
-          });
+          } else {
+            console.error('No event data in the response');
+            this.error = true;
+          }
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error fetching event details:', err);
+          this.error = true;
+          this.loading = false;
+        }
+      });
     });
   }
 
   // Add sort events method
   sortEvents(method: string): void {
     this.currentSortMethod = method;
-    
+
     if (!this.events || this.events.length === 0) return;
-    
+
     switch (method) {
       case 'alphabetical':
         // Sort alphabetically by name
         this.events.sort((a, b) => a.name.localeCompare(b.name));
         break;
-        
+
       case 'date':
         // Sort by event date (earliest first)
         this.events.sort((a, b) => {
@@ -129,7 +129,7 @@ export class UpcomingEventsPage {
           return dateA - dateB;
         });
         break;
-        
+
       case 'venue':
         // Sort by venue name
         this.events.sort((a, b) => {
@@ -138,7 +138,7 @@ export class UpcomingEventsPage {
           return venueA.localeCompare(venueB);
         });
         break;
-        
+
       default:
         // Default to date sort
         this.events.sort((a, b) => {
@@ -213,5 +213,26 @@ export class UpcomingEventsPage {
         console.error('Error cancelling notification:', error);
       }
     }
+  }
+
+  // Helper to check if event has any images
+  hasImages(event: any): boolean {
+    return Boolean(event?.images && event.images.length > 0);
+  }
+
+  // Get image url with width > 320 or fallback to first image
+  getEventImageUrl(event: any): string {
+    console.log('Event images:', event.images);
+    if (!event.images || event.images.length === 0) {
+      return '';
+    }
+
+    event.images.forEach((img: any) => {
+      console.log('Image width:', img.width);
+      if (img.width > 400) {
+        return img.url;
+      }
+    });
+    return event.images[0].url;
   }
 }

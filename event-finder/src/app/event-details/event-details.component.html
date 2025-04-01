@@ -4,7 +4,8 @@
       <ion-back-button defaultHref="/"></ion-back-button>
     </ion-buttons>
     <ion-title>Details</ion-title>
-    <ion-toggle class="status-toggle" slot="end" [(ngModel)]="eventStatus" (ionChange)="toggleEventStatus()">I'm interested</ion-toggle>
+    <ion-toggle class="status-toggle" slot="end" [(ngModel)]="eventStatus" (ionChange)="toggleEventStatus()">I'm
+      interested</ion-toggle>
   </ion-toolbar>
 </ion-header>
 
@@ -20,11 +21,11 @@
 
   <div *ngIf="!loading && !error && event" class="event-container">
     <ion-card class="event-image-card">
-      @if (event.images && event.images.length > 0 && event.images[0].width > 320) {
-        <img class="event-image" [src]="event.images[0].url" [alt]="event.name + ' image'">
-        } @else if (event.images && event.images.length > 1) {
-        <img class="event-image" [src]="event.images[1].url" [alt]="event.name + ' image'">
-        }
+      @if (hasImages()) {
+      <img class="event-image" [src]="getEventImageUrl()" [alt]="event.name + ' image'">
+      } @else {
+      <div class="no-image-placeholder">No image available</div>
+      }
       <ion-card-header>
         <ion-card-title>{{ event.name }}</ion-card-title>
       </ion-card-header>
@@ -34,55 +35,64 @@
 
       <ion-item>
         <ion-label>Date & Time</ion-label>
-        <ion-note slot="end">{{ event.dates.start.localDate && event.dates.start.localTime ? event.dates.start.localDate
+        <ion-note slot="end">{{ event.dates?.start?.localDate && event.dates?.start?.localTime ?
+          event.dates.start.localDate
           + " @ " + event.dates.start.localTime : "Date unavailable" }}</ion-note>
       </ion-item>
 
       <ion-item>
         <ion-label>Location</ion-label>
-        <ion-note slot="end">{{ event._embedded.venues[0].name && event._embedded.venues[0].state.name ? event._embedded.venues[0].name + ", " + event._embedded.venues[0].state.name : "Date Unavailable"
+        <ion-note slot="end">{{ event._embedded?.venues && event._embedded.venues[0]?.name ?
+          event._embedded.venues[0].name + (event._embedded.venues[0].city?.name ? ", " +
+          event._embedded.venues[0].city.name : "") : "Location unavailable"
           }}</ion-note>
       </ion-item>
 
       <ion-item>
         <ion-label>Price Range</ion-label>
-        <ion-note slot="end">{{ event.priceRanges[0].min ? "$" + event.priceRanges[0].min : "Price unavailable" }}
-          - {{ event.priceRanges[0].max ? "$" + event.priceRanges[0].max : "Price unavailable" }}</ion-note>
+        <ion-note slot="end">{{ event.priceRanges && event.priceRanges[0]?.min ? "$" + event.priceRanges[0].min : "Price
+          unavailable" }}
+          {{ event.priceRanges && event.priceRanges[0]?.min && event.priceRanges[0]?.max ? " - $" +
+          event.priceRanges[0].max : "" }}</ion-note>
       </ion-item>
 
       <ion-item>
         <ion-label>Age Restrictions</ion-label>
-        <ion-note slot="end">{{ event.info ? event.info : "No age restrictions" }}</ion-note>
+        <ion-note slot="end">{{ event.ageRestrictions ? event.ageRestrictions : (event.info ? event.info : "No age
+          restrictions") }}</ion-note>
       </ion-item>
 
       <ion-item>
         <ion-label>Genre</ion-label>
-        <ion-note slot="end">{{ event.classifications[0].genre.name ? event.classifications[0].genre.name : "Genre
-          unavailable" }}</ion-note>
+        <ion-note slot="end">{{ event.classifications && event.classifications[0]?.genre?.name ?
+          event.classifications[0].genre.name : "Genre unavailable" }}</ion-note>
       </ion-item>
     </ion-list>
 
-    <div class="ticket-info" *ngIf="event.url">
-      <a [href]="event.url" target="_blank" class="buy-tickets-btn">
-        <ion-button expand="block" color="primary">
-          Buy Tickets
+    <div class="event-btns-container">
+      <div class="ticket-info" *ngIf="event.url">
+        <a [href]="event.url" target="_blank" class="buy-tickets-btn">
+          <ion-button expand="block" color="primary">
+            Buy Tickets
+          </ion-button>
+        </a>
+      </div>
+
+      <div *ngIf="event._embedded?.venues && event._embedded.venues[0]?.location">
+        <a [href]="'https://www.google.com/maps?q=' + event._embedded.venues[0].location.latitude + ',' + event._embedded.venues[0].location.longitude"
+          target="_blank">
+          <ion-button expand="block" color="secondary">
+            Get Directions
+          </ion-button>
+        </a>
+      </div>
+
+      <div class="share-event">
+        <ion-button expand="block" color="tertiary" (click)="shareEvent(event)">
+          Share Event
         </ion-button>
-      </a>
+      </div>
     </div>
-
-    <div class="map-link" *ngIf="event._embedded.venues[0].location">
-      <a [href]="'https://www.google.com/maps?q=' + event._embedded.venues[0].location.latitude + ',' + event._embedded.venues[0].location.longitude" target="_blank">
-        <ion-button expand="block" color="secondary">
-          Get Directions
-        </ion-button>
-      </a>
-    </div>
-
-    <div class="share-event">
-      <ion-button expand="block" color="tertiary" (click)="shareEvent(event)">
-        Share Event
-      </ion-button>
-    </div>
-
   </div>
+
 </ion-content>

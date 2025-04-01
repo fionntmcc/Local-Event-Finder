@@ -121,6 +121,12 @@ export class EventDetailsPage {
         if (response) {
           this.event = response;
           
+          // Debug logging for image data structure
+          console.log('Event images:', this.event.images);
+          if (this.event.images && this.event.images.length > 0) {
+            console.log('First image properties:', this.event.images[0]);
+          }
+          
           // Set the eventStatus based on whether this event ID is in the saved events
           this.eventStatus = this.eventIds.includes(this.event.id);
         } else {
@@ -152,5 +158,26 @@ export class EventDetailsPage {
         url
       });
     }
+  }
+
+  // Get image url with width > 320 or fallback to first image
+  getEventImageUrl(): string {
+    if (!this.event?.images || this.event.images.length === 0) {
+      return '';
+    }
+    
+    // Find an image with width > 320
+    const largeImage = this.event.images.find(img => img.width > 320);
+    if (largeImage) {
+      return largeImage.url;
+    }
+    
+    // Fallback to first image
+    return this.event.images[0].url;
+  }
+  
+  // Helper to check if event has any images
+  hasImages(): boolean {
+    return Boolean(this.event?.images && this.event.images.length > 0);
   }
 }
